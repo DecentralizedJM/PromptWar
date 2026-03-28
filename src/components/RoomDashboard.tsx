@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
 import { LifeBridgeLogo } from '@/components/LifeBridgeLogo';
-import { useI18n } from '@/components/I18nProvider';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
 import { MemberIndicator } from './MemberIndicator';
@@ -48,7 +47,6 @@ export function RoomDashboard({
   onLeave,
 }: RoomDashboardProps) {
   void _memberId; // reserved for future per-member features; parent always passes it
-  const { locale, t } = useI18n();
   const [cards, setCards] = useState<RoomCard[]>([]);
   const [members, setMembers] = useState<RoomMember[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -81,9 +79,9 @@ export function RoomDashboard({
 
   const processInput = async (text: string, images: { data: string; mimeType: string }[]) => {
     setIsProcessing(true);
-    const result = await submitToGemini(text, images, { uiLocale: locale });
+    const result = await submitToGemini(text, images);
     if (result.error) {
-      alert(`${t.errorPrefix} ${result.error}`);
+      alert('Error: ' + result.error);
       setIsProcessing(false);
       return;
     }

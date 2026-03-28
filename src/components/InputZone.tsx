@@ -3,12 +3,14 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, Upload, ClipboardPaste, Link2, X, Sparkles, Loader2, StopCircle } from 'lucide-react';
-import { getSpeechLangForLocale } from '@/lib/i18n/config';
-import { getMessages } from '@/lib/i18n/dictionaries';
-import { useI18n } from '@/components/I18nProvider';
+import { getBrowserSpeechLang } from '@/lib/speech-lang';
 import { cn } from '@/lib/utils';
 
 type InputMode = 'upload' | 'voice' | 'paste' | 'url';
+
+const VOICE_UNSUPPORTED =
+  'Voice input needs a Chromium-based browser (Chrome or Edge) with microphone access.';
+const VOICE_PERMISSION = 'Microphone blocked. Allow access in your browser settings and try again.';
 
 export function InputZone({
   onSubmit,
@@ -17,7 +19,6 @@ export function InputZone({
   onSubmit: (text: string, images: { data: string; mimeType: string }[]) => void;
   isProcessing: boolean;
 }) {
-  const { locale, t } = useI18n();
   const [activeMode, setActiveMode] = useState<InputMode>('upload');
   const [text, setText] = useState('');
   const [interimText, setInterimText] = useState('');
@@ -29,7 +30,6 @@ export function InputZone({
   const [voiceError, setVoiceError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Web Speech API (Chromium); types vary by browser
   const recognitionRef = useRef<{
     lang: string;
     continuous: boolean;
@@ -56,7 +56,7 @@ export function InputZone({
     const recognition = new SR() as NonNullable<typeof recognitionRef.current>;
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = getSpeechLangForLocale(locale);
+    recognition.lang = getBrowserSpeechLang();
 
     recognition.onresult = (event) => {
       let interim = '';
@@ -78,11 +78,10 @@ export function InputZone({
     };
 
     recognition.onerror = (event: { error: string; message?: string }) => {
-      const tm = getMessages(locale);
       listeningIntentRef.current = false;
       setIsRecording(false);
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setVoiceError(tm.voiceNeedPermission);
+        setVoiceError(VOICE_PERMISSION);
       } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
         setVoiceError(event.message || event.error);
       }
@@ -112,13 +111,13 @@ export function InputZone({
       }
       recognitionRef.current = null;
     };
-  }, [locale]);
+  }, []);
 
   const toggleRecording = () => {
     setVoiceError(null);
     const recognition = recognitionRef.current;
     if (!voiceSupported || !recognition) {
-      setVoiceError(getMessages(locale).voiceUnsupported);
+      setVoiceError(VOICE_UNSUPPORTED);
       return;
     }
     if (isRecording) {
@@ -144,7 +143,7 @@ export function InputZone({
     } catch {
       listeningIntentRef.current = false;
       setIsRecording(false);
-      setVoiceError(getMessages(locale).voiceUnsupported);
+      setVoiceError(VOICE_UNSUPPORTED);
     }
   };
 
@@ -183,16 +182,16 @@ export function InputZone({
   };
 
   const pills: { mode: InputMode; icon: React.ReactNode; label: string }[] = [
-    { mode: 'upload', icon: <Upload size={16} />, label: t.inputUpload },
-    { mode: 'voice', icon: <Mic size={16} />, label: t.inputVoice },
-    { mode: 'paste', icon: <ClipboardPaste size={16} />, label: t.inputPaste },
-    { mode: 'url', icon: <Link2 size={16} />, label: t.inputUrl },
+    { mode: 'upload', icon: <Upload size={16} />, label: 'Upload' },
+    { mode: 'voice', icon: <Mic size={16} />, label: 'Voice' },
+    { mode: 'paste', icon: <ClipboardPaste size={16} />, label: 'Paste' },
+    { mode: 'url', icon: <Link2 size={16} />, label: 'URL' },
   ];
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
+    <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
       <nav
-        className="mb-8 flex flex-wrap justify-center gap-2 overflow-hidden rounded-full border border-border bg-card/40 p-1 shadow-navy backdrop-blur-md premium-edge-light"
+        className="premium-edge-light mb-8 flex flex-wrap justify-center gap-2 overflow-hidden rounded-full border border-border bg-card/40 p-1 shadow-navy backdrop-blur-md"
         aria-label="Input methods"
       >
         {pills.map((pill) => (
@@ -218,7 +217,7 @@ export function InputZone({
 
       <div
         className={cn(
-          'premium-panel-light relative w-full bg-card/50 shadow-navy backdrop-blur-xl transition-all duration-500 drop-zone-border border-glass',
+          'premium-panel-light drop-zone-border relative w-full border-glass bg-card/50 shadow-navy backdrop-blur-xl transition-all duration-500',
           isDragging && 'scale-[1.02] bg-secondary/40 shadow-glow-seafoam'
         )}
         onDragOver={(e) => {
@@ -238,8 +237,10 @@ export function InputZone({
               >
                 <Upload className="h-8 w-8 text-primary" />
               </button>
-              <h2 className="mb-2 font-heading text-xl font-black tracking-tight">{t.dropTitle}</h2>
-              <p className="max-w-xs text-sm font-medium text-foreground/50">{t.dropHint}</p>
+              <h2 className="mb-2 font-heading text-xl font-black tracking-tight">Drop anything here</h2>
+              <p className="max-w-xs text-sm font-medium text-foreground/50">
+                Photos, prescriptions, documents, or messy text notes
+              </p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -273,12 +274,12 @@ export function InputZone({
                 </button>
               </div>
               <h2 className="mb-2 font-heading text-xl font-black tracking-tight">
-                {isRecording ? t.voiceListening : t.voiceTap}
+                {isRecording ? 'Listening…' : 'Tap to record'}
               </h2>
               <p className="min-h-[4rem] max-w-lg px-2 text-sm font-medium text-foreground/55">
                 {voiceError ||
                   voiceDisplay ||
-                  (isRecording ? t.voiceSpeakNow : voiceSupported ? t.voiceHint : t.voiceUnsupported)}
+                  (isRecording ? 'Speak now' : voiceSupported ? 'Voice your messy thoughts' : VOICE_UNSUPPORTED)}
               </p>
             </div>
           )}
@@ -289,7 +290,7 @@ export function InputZone({
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 autoFocus
-                placeholder={t.pastePlaceholder}
+                placeholder="Dump everything here — prescriptions, bills, messy notes… We'll bridge the gap."
                 className="premium-field-light h-48 w-full resize-none rounded-2xl border-glass bg-secondary/30 p-6 text-base font-medium text-foreground placeholder:text-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/45"
               />
             </div>
@@ -304,7 +305,7 @@ export function InputZone({
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   autoFocus
-                  placeholder={t.urlPlaceholder}
+                  placeholder="Paste a link to process (article, PDF, document)…"
                   className="premium-field-light w-full rounded-2xl border-glass bg-secondary/30 py-5 pl-12 pr-6 text-base font-medium text-foreground placeholder:text-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/45"
                 />
               </div>
@@ -348,7 +349,7 @@ export function InputZone({
           )}
         >
           {isProcessing ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {isProcessing ? t.bridging : t.bridgeIt}
+          {isProcessing ? 'Bridging…' : 'Bridge It →'}
         </button>
       )}
     </div>

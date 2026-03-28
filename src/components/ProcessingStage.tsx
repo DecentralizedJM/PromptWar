@@ -1,34 +1,29 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { useI18n } from '@/components/I18nProvider';
+
+const STATUS_MESSAGES = [
+  'Reading your input…',
+  'Extracting entities…',
+  'Cross-referencing data…',
+  'Identifying domains…',
+  'Building your bridge…',
+  'Finalizing structure…',
+];
 
 export function ProcessingStage() {
-  const { t } = useI18n();
   const [statusIdx, setStatusIdx] = useState(0);
-
-  const lines = useMemo(
-    () => [
-      t.processingLine0,
-      t.processingLine1,
-      t.processingLine2,
-      t.processingLine3,
-      t.processingLine4,
-      t.processingLine5,
-    ],
-    [t]
-  );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStatusIdx((prev) => (prev + 1) % lines.length);
+      setStatusIdx((prev) => (prev + 1) % STATUS_MESSAGES.length);
     }, 1500);
     return () => clearInterval(interval);
-  }, [lines.length]);
+  }, []);
 
-  const liveLine = lines[statusIdx] ?? '';
-  const srAnnouncement = t.processingFooter.replace('{status}', liveLine);
+  const liveLine = STATUS_MESSAGES[statusIdx] ?? '';
+  const srAnnouncement = `LifeBridge is currently ${liveLine} processing your input and generating structured actions. Please wait.`;
 
   return (
     <div className="flex flex-col items-center justify-center py-20 min-h-[50vh] w-full max-w-4xl mx-auto px-4 overflow-hidden">
@@ -108,7 +103,7 @@ export function ProcessingStage() {
       </div>
 
       <div className="relative flex h-12 items-center justify-center text-center">
-        {lines.map((msg, idx) => (
+        {STATUS_MESSAGES.map((msg, idx) => (
           <h2
             key={idx}
             className={cn(
@@ -124,7 +119,7 @@ export function ProcessingStage() {
       </div>
 
       <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-foreground/35 md:text-sm">
-        {t.processingEngineActive}
+        Gemini processing engine active
       </p>
 
       <div className="sr-only" aria-live="polite">

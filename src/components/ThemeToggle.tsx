@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { useI18n } from '@/components/I18nProvider';
 import { cn } from '@/lib/utils';
 
 function subscribe(onStoreChange: () => void) {
@@ -21,7 +20,6 @@ function getServerSnapshot() {
 }
 
 export function ThemeToggle() {
-  const { t } = useI18n();
   const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggle = () => {
@@ -38,7 +36,7 @@ export function ThemeToggle() {
         'relative z-10 flex items-center w-16 h-8 rounded-full p-1 transition-colors duration-300 border border-border premium-edge-light',
         dark ? 'bg-secondary' : 'bg-primary/15'
       )}
-      aria-label={dark ? t.themeLight : t.themeDark}
+      aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
       aria-pressed={dark}
     >
       <span

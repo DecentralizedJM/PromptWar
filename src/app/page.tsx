@@ -8,8 +8,6 @@ import { ProcessingStage } from '@/components/ProcessingStage';
 import { StructuredCardView } from '@/components/StructuredCard';
 import { FamilyModeButton } from '@/components/FamilyModeButton';
 import { LifeBridgeLogo } from '@/components/LifeBridgeLogo';
-import { useI18n } from '@/components/I18nProvider';
-import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { WavyHover } from '@/components/WavyHover';
 import { HistoryItem, StructuredCard } from '@/lib/types';
@@ -47,7 +45,6 @@ function GeminiLogo({ className = '' }: { className?: string }) {
 }
 
 function HomeContent() {
-  const { locale, t } = useI18n();
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeResults, setActiveResults] = useState<StructuredCard[] | null>(null);
@@ -76,9 +73,9 @@ function HomeContent() {
   const processInput = async (text: string, images: { data: string; mimeType: string }[]) => {
     setIsProcessing(true);
     setActiveResults(null);
-    const result = await submitToGemini(text, images, { uiLocale: locale });
+    const result = await submitToGemini(text, images);
     if (result.error) {
-      alert(`${t.errorPrefix} ${result.error}`);
+      alert('Error: ' + result.error);
       setIsProcessing(false);
       return;
     }
@@ -92,7 +89,7 @@ function HomeContent() {
       };
       saveHistory([newItem, ...history]);
     } else {
-      alert(t.noActions);
+      alert('No structured actions could be extracted from this input.');
     }
     setIsProcessing(false);
   };
@@ -124,11 +121,10 @@ function HomeContent() {
       {/* Main Content Stage */}
       <div className="relative z-20 flex w-full flex-1 flex-col items-center overflow-y-auto px-4 pb-32 pt-6 no-scrollbar md:px-16">
         <div className="relative flex w-full max-w-4xl flex-1 flex-col">
-          {/* Header: above sidebar stacking so theme + language stay clickable */}
+          {/* Header: above sidebar stacking so theme controls stay clickable */}
           <div className="relative z-30 mb-12 flex items-center justify-between gap-3">
             <LifeBridgeLogo size="md" className="opacity-95" />
             <div className="flex items-center gap-2 sm:gap-3">
-              <LanguageSelector />
               <ThemeToggle />
               <FamilyModeButton
                 onRoomJoined={(code, memberId, emoji, name) => setRoom({ code, memberId, emoji, name })}
@@ -140,37 +136,38 @@ function HomeContent() {
             <div className="flex-1 flex flex-col items-center justify-center py-12 animate-in fade-in zoom-in-95 duration-700">
               <WavyHover intensity={6} scale={1.01}>
                 <h1 className="text-6xl md:text-8xl font-heading font-black text-center mb-8 tracking-tighter leading-[0.9]">
-                  {t.heroTitleLine1} <br />
-                  <span className="text-gold italic">{t.heroTitleThe}</span> {t.heroTitleLine2}
+                  Bridge <br />
+                  <span className="text-gold italic">the</span> gap.
                 </h1>
               </WavyHover>
 
-              <p className="max-w-2xl text-center text-foreground/45 text-lg md:text-xl font-medium mb-5 leading-relaxed tracking-tight text-balance">
-                {t.heroSubtitle}
+              <p className="mb-3 max-w-2xl text-balance text-center text-lg font-medium leading-relaxed tracking-tight text-foreground/45 md:text-xl">
+                The universal interface for messy human intent. Drop notes, voice memos, or photos and turn chaos into structure.
               </p>
 
-              <p className="max-w-xl text-center text-foreground/40 text-sm md:text-[15px] font-medium mb-2 leading-relaxed text-balance px-2">
-                {t.heroDescription} {t.heroDescription2}
+              <p className="mb-8 text-center text-xs font-semibold uppercase tracking-[0.2em] text-foreground/50 md:text-sm">
+                All Indian languages supported.
               </p>
+
               <div
-                className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-10 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30"
+                className="mb-10 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30"
                 aria-label="Example audiences"
               >
-                <span>{t.audienceCaregivers}</span>
-                <span className="hidden sm:inline text-foreground/15" aria-hidden>
+                <span>Caregivers</span>
+                <span className="hidden text-foreground/15 sm:inline" aria-hidden>
                   ·
                 </span>
-                <span>{t.audienceBureaucracy}</span>
-                <span className="hidden sm:inline text-foreground/15" aria-hidden>
+                <span>Newcomers to bureaucracy</span>
+                <span className="hidden text-foreground/15 sm:inline" aria-hidden>
                   ·
                 </span>
-                <span>{t.audienceAnyone}</span>
+                <span>Anyone past capacity</span>
               </div>
 
               {/* Powered by Gemini badge */}
-              <div className="flex items-center gap-2 mb-12 opacity-70 transition-opacity hover:opacity-100">
+              <div className="mb-12 flex items-center gap-2 opacity-70 transition-opacity hover:opacity-100">
                 <GeminiLogo className="w-5 h-5" />
-                <span className="text-xs font-semibold tracking-wide text-foreground/65">{t.poweredByGemini}</span>
+                <span className="text-xs font-semibold tracking-wide text-foreground/65">Powered by Gemini</span>
               </div>
 
               <WavyHover className="w-full relative z-10 transition-all duration-500" intensity={4} scale={1.005}>
@@ -180,25 +177,27 @@ function HomeContent() {
               {/* Privacy Disclaimer */}
               <div className="premium-edge-light mt-8 flex max-w-xl items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-5 py-3">
                 <ShieldCheck size={16} className="shrink-0 text-primary" />
-                <p className="text-[11px] font-medium leading-relaxed text-foreground/55">{t.privacyNote}</p>
+                <p className="text-[11px] font-medium leading-relaxed text-foreground/55">
+                  Your privacy matters. We never store, log, or retain your personal documents or data. All processing happens in real-time and nothing is saved to our servers.
+                </p>
               </div>
 
               {/* Demo Section */}
               <div className="mt-16 w-full animate-slide-up" style={{ animationDelay: '400ms' }}>
                  <div className="mb-6 flex items-center justify-center gap-3 opacity-35">
                     <div className="h-px w-8 bg-foreground" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t.tryItOut}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Try It Out</span>
                     <div className="h-px w-8 bg-foreground" />
                  </div>
                  <div className="flex flex-wrap justify-center gap-3">
                    {[
                      { 
-                       label: t.demoMed, 
+                       label: 'Medication Synergy', 
                        prompt: 'I take 20mg Lisinopril every morning and just got prescribed 400mg Ibuprofen for my knee pain. Should I be worried?',
                        icon: <Sparkles size={12} />
                      },
                      { 
-                       label: t.demoPay, 
+                       label: 'Urgent Payables', 
                        prompt: 'Got an urgent notice from PG&E. Bill is $245.80 due on Oct 15th. Disconnection warning.',
                        icon: <RefreshCw size={12} />
                      }
@@ -229,8 +228,8 @@ function HomeContent() {
             <div className="space-y-10 pb-20 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                  <h2 className="mb-1 text-sm font-black uppercase tracking-[0.3em] text-foreground/35">{t.bridgeResult}</h2>
-                  <p className="text-2xl font-black tracking-tight">{t.structuredOutput}</p>
+                  <h2 className="mb-1 text-sm font-black uppercase tracking-[0.3em] text-foreground/35">Bridge Result</h2>
+                  <p className="text-2xl font-black tracking-tight">Structured Output</p>
                 </div>
                 <button 
                   type="button"
@@ -238,7 +237,7 @@ function HomeContent() {
                   className="flex items-center gap-2 rounded-xl border-glass bg-secondary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-foreground/45 transition-all hover:bg-secondary/80 hover:text-foreground premium-edge-light"
                 >
                   <RefreshCw size={12} />
-                  {t.resetStage}
+                  Reset Stage
                 </button>
               </div>
 
@@ -251,7 +250,7 @@ function HomeContent() {
               </div>
               
               <div className="mt-12 rounded-3xl border border-dashed border-glass bg-card/30 p-8 text-center premium-panel-light">
-                 <p className="text-sm font-medium italic text-foreground/45">&ldquo;{t.quoteFooter}&rdquo;</p>
+                 <p className="text-sm font-medium italic text-foreground/45">&ldquo;The shortest path between thought and action.&rdquo;</p>
               </div>
             </div>
           )}

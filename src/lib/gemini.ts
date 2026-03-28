@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { GoogleGenAI } from '@google/genai';
 import { GEMINI_API_KEY_MISSING_MESSAGE, getGeminiApiKeyFromEnv } from './gemini-env';
-import { getLocaleEnglishName, type AppLocale } from './i18n/config';
 import { GEMINI_MODEL_ID } from './google-services';
 import { ProcessingResult } from './types';
 const responseSchema: any = {
@@ -52,8 +51,7 @@ const responseSchema: any = {
 
 export async function processInputWithGemini(
   textContent: string,
-  imagesBase64: { data: string, mimeType: string }[] = [],
-  options?: { uiLocale?: AppLocale }
+  imagesBase64: { data: string, mimeType: string }[] = []
 ): Promise<ProcessingResult> {
   const apiKey = getGeminiApiKeyFromEnv();
   if (!apiKey) {
@@ -62,18 +60,11 @@ export async function processInputWithGemini(
   const ai = new GoogleGenAI({ apiKey });
 
   try {
-    const uiLocale = options?.uiLocale ?? 'en';
-    const langName = getLocaleEnglishName(uiLocale);
-    const outputLanguageRule =
-      uiLocale === 'en'
-        ? 'Write human-readable strings in clear English.'
-        : `Write human-readable strings (card titles, summaries, item labels and values, and action labels) in ${langName} when natural; keep JSON keys and domain enum values exactly as specified in English.`;
-
     const prompt = `You are LifeBridge, an advanced AI that acts as a universal bridge between messy human intent and structured life-serving actions.
 Your task is to take the provided raw input (text, images, or audio transcript) and parse, structure, verify, and convert it into clear, actionable next steps.
 
-The user's preferred UI language is ${langName}. The raw input may be in any language (including Indian languages such as Hindi, Kannada, Tamil, Telugu, Bengali, Malayalam, Assamese, and others)—understand it fully without asking for translation first.
-${outputLanguageRule}
+The raw input may be in English or any Indian language (e.g. Hindi, Kannada, Tamil, Telugu, Bengali, Malayalam, Assamese, Gujarati, Marathi, Punjabi, Odia, Urdu)—understand it fully without asking the user to translate first.
+Write all human-readable strings in the JSON (titles, summaries, labels, action labels) in clear English. Keep JSON keys and domain enum values exactly as specified in English.
 
 Output the data as a JSON object matching the requested schema.
 - Organize items into logical domains (HEALTH, FINANCE, LOGISTICS, GOVERNMENT_LEGAL, GENERAL).

@@ -12,9 +12,9 @@ LifeBridge is a Next.js web application powered by **Google Gemini** that turns 
 
 - **Branding:** LIFE BRIDGE lockup (`public/brand/life-bridge-logo.png`, `LifeBridgeLogo`); favicon + Apple touch icon (`src/app/icon.png`, `src/app/apple-icon.png`).
 - **Gemini model:** `gemini-flash-latest` (Generative Language API alias), configured in `src/lib/google-services.ts`, called via `@google/genai` in `src/lib/gemini.ts`.
-- **Languages:** Client i18n (`src/lib/i18n/*`, `I18nProvider`, `LanguageSelector`) — English plus Indian locales (e.g. Hindi, Kannada, Bengali, Tamil, Telugu, Malayalam, and more); `document.documentElement.lang` updates with selection; server action accepts `uiLocale` so prompts favor the chosen language for human-readable fields.
+- **Languages:** UI stays in **English**; the hero states **“All Indian languages supported.”** Users may type or dictate in Indian languages—**Gemini** is instructed to understand that input and return **English** structured card text (`src/lib/gemini.ts`). Voice uses the browser’s `navigator.language` for Web Speech `recognition.lang` (`src/lib/speech-lang.ts`).
 - **Typography:** Inter, Merriweather, Noto Sans (Latin + Devanagari via `next/font`); additional Noto families for Indic scripts via Google Fonts in `layout.tsx`.
-- **Voice input:** Web Speech API with locale-matched `recognition.lang`, interim + final transcript handling, and improved error/unsupported-browser messaging (best in **Chrome / Edge**).
+- **Voice input:** Web Speech API with **`recognition.lang`** from the browser locale, interim + final transcript handling, and clearer unsupported/mic errors (best in **Chrome / Edge**).
 - **UI / theme:** Light + dark “premium green” themes (`globals.css`); light-mode edge/shadow utilities; theme toggle stacking fixed when the history sidebar is open; footer credits maintainer with GitHub link (`SiteFooter` via `AppWrappers`).
 
 ---
@@ -120,7 +120,7 @@ sequenceDiagram
     participant GeminiAPI as Gemini
 
     User->>Browser: Drops a medical bill photo
-    Browser->>ServerAction: submitToGemini(base64, text, locale?)
+    Browser->>ServerAction: submitToGemini(base64, text)
     activate ServerAction
     Note right of ServerAction: API key is server-only
     ServerAction->>GeminiAPI: generateContent(image + schema)
@@ -142,7 +142,7 @@ graph LR
     Page --> ProcessingStage:::comp
     Page --> StructuredCardView:::comp
     Page --> HistorySidebar:::comp
-    Page --> LanguageSelector["LanguageSelector<br/>+ ThemeToggle"]:::comp
+    Page --> ThemeToggle["ThemeToggle"]:::comp
     StructuredCardView --> ActionEngine:::comp
     InputZone -->|"Web Speech API"| VoiceInput["Voice Dictation"]:::comp
     InputZone -->|"Drag & Drop"| ImageInput["Image Preview"]:::comp
@@ -185,7 +185,7 @@ graph LR
 ### Google Services Integration
 | Service | Usage |
 |---|---|
-| **Gemini (`gemini-flash-latest`)** | Core AI engine — multimodal content generation with enforced JSON Schema output, explicit reasoning, and **UI-locale-aware** prompts (`submitToGemini` options). |
+| **Gemini (`gemini-flash-latest`)** | Core AI engine — multimodal content generation with enforced JSON Schema output, explicit reasoning; understands **English and Indian-language input**, outputs human-readable card fields in **English**. |
 | **Google Firestore** | Real-time database — powers **Family Mode** (room sync and member tracking) and **Bridge Share** (persistent shared links). |
 | **Google Cloud Run** | Production deployment — serverless, auto-scaling, zero-downtime Docker containers in `europe-west1`. |
 | **Google Fonts** | Typography — Inter, Merriweather, Noto Sans (Devanagari + Latin) via `next/font`; additional **Noto** script families linked for Indic / Arabic coverage. |
@@ -200,7 +200,7 @@ graph LR
 | Frontend | Next.js 16 (App Router), React 19 |
 | Styling | Tailwind CSS 4 with custom design tokens (light/dark premium green) |
 | AI | `@google/genai` — **`gemini-flash-latest`** |
-| i18n | `src/lib/i18n` + `I18nProvider` + `LanguageSelector` (English + Indian locales) |
+| Multilingual input | Indian-language (and English) text/voice understood by Gemini; UI copy in English; `src/lib/speech-lang.ts` for voice `lang`. |
 | Testing | Vitest, React Testing Library |
 | Deployment | Google Cloud Run (Docker), Vercel |
 | Persistence | Browser localStorage |
