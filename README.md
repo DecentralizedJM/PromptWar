@@ -6,6 +6,17 @@ LifeBridge is a Next.js web application powered by **Google Gemini** that turns 
 
 **Live Demo:** [https://promptwar-214175642765.europe-west1.run.app](https://promptwar-214175642765.europe-west1.run.app)
 
+**Repo:** [github.com/DecentralizedJM/PromptWar](https://github.com/DecentralizedJM/PromptWar)
+
+### What shipped recently
+
+- **Branding:** LIFE BRIDGE lockup (`public/brand/life-bridge-logo.png`, `LifeBridgeLogo`); favicon + Apple touch icon (`src/app/icon.png`, `src/app/apple-icon.png`).
+- **Gemini model:** `gemini-flash-latest` (Generative Language API alias), configured in `src/lib/google-services.ts`, called via `@google/genai` in `src/lib/gemini.ts`.
+- **Languages:** Client i18n (`src/lib/i18n/*`, `I18nProvider`, `LanguageSelector`) — English plus Indian locales (e.g. Hindi, Kannada, Bengali, Tamil, Telugu, Malayalam, and more); `document.documentElement.lang` updates with selection; server action accepts `uiLocale` so prompts favor the chosen language for human-readable fields.
+- **Typography:** Inter, Merriweather, Noto Sans (Latin + Devanagari via `next/font`); additional Noto families for Indic scripts via Google Fonts in `layout.tsx`.
+- **Voice input:** Web Speech API with locale-matched `recognition.lang`, interim + final transcript handling, and improved error/unsupported-browser messaging (best in **Chrome / Edge**).
+- **UI / theme:** Light + dark “premium green” themes (`globals.css`); light-mode edge/shadow utilities; theme toggle stacking fixed when the history sidebar is open; footer credits maintainer with GitHub link (`SiteFooter` via `AppWrappers`).
+
 ---
 
 ## Use case & impact
@@ -51,17 +62,17 @@ LifeBridge operates as a **context-aware life management assistant** that bridge
 The solution follows a three-phase pipeline:
 
 1. **Capture** — Accept multimodal input (typed text, voice dictation, or drag-and-drop images) without requiring the user to pre-categorize anything.
-2. **Reason** — Route the raw payload to **Gemini 3 Flash Preview** with a strictly enforced JSON Schema. The model categorizes inputs into domains, assigns confidence scores, flags warnings, and generates an explicit **Logic Reasoning** explanation for every decision.
+2. **Reason** — Route the raw payload to **Gemini** (`gemini-flash-latest`) with a strictly enforced JSON Schema. The model categorizes inputs into domains, assigns confidence scores, flags warnings, and generates an explicit **Logic Reasoning** explanation for every decision.
 3. **Act & Share** — Render structured output cards with one-tap action buttons. Users can generate **Bridge Share** links (7-day TTL) for read-only branded views with QR codes.
 4. **Collaborate** — Enable **Family Mode** using a 6-digit room code system. This creates a real-time **Family Health Dashboard** powered by **Google Firestore**, where multiple members can contribute and sync data instantly.
 
 ### How the Solution Works
 
-A user drops a photo of a medical bill. The image is Base64-encoded and sent securely to Gemini 3. Gemini returns categorized items with AI reasoning. In solo mode, this is archived locally. In **Family Mode**, characters join a room; every time a document is processed, it is pushed to a Firestore sub-collection. All room members see a live, merged dashboard grouped by domain (e.g., Mom's labs + Dad's insurance). Users can also click "Share" to generate a unique Firestore-backed URL that renders a branded read-only card with a QR code for easy mobile viewing.
+A user drops a photo of a medical bill. The image is Base64-encoded and sent securely to Gemini. Gemini returns categorized items with AI reasoning. In solo mode, this is archived locally. In **Family Mode**, members join a room; every time a document is processed, it is pushed to a Firestore sub-collection. All room members see a live, merged dashboard grouped by domain (e.g., Mom's labs + Dad's insurance). Users can also click "Share" to generate a unique Firestore-backed URL that renders a read-only card view with a QR code for easy mobile viewing.
 
 ### Assumptions Made
 
-- Users have access to a modern browser supporting the Web Speech API (Chrome, Edge, Safari).
+- **Voice:** Chromium browsers (**Chrome, Edge**) provide the most reliable Web Speech API behavior; other browsers may fall back to text/image input only.
 - The Gemini API key is provisioned via Google AI Studio (free tier, no credit card required).
 - Sensitive documents processed through the API are subject to Google's standard data handling policies. No user data is stored on our servers.
 - The application prioritizes speed over exhaustive validation—Gemini's confidence score and reasoning help users decide whether to trust the output.
@@ -72,9 +83,9 @@ A user drops a photo of a medical bill. The image is Base64-encoded and sent sec
 
 | Criteria | How LifeBridge Delivers |
 |---|---|
-| **Smart Dynamic Assistant** | Multimodal input (text, image, voice) processed by Gemini 3 Flash Preview with confidence-weighted, domain-categorized structured outputs. |
+| **Smart Dynamic Assistant** | Multimodal input (text, image, voice) processed by **Gemini** (`gemini-flash-latest`) with confidence-weighted, domain-categorized structured outputs. |
 | **Logical Decision Making** | Every output card includes an explicit **AI Insight** with the model's chain-of-thought reasoning—why it flagged a warning, chose a domain, or suggested a specific action. |
-| **Effective Google Services** | `@google/genai` SDK (Gemini 3), Google Cloud Run (serverless Docker deployment), Google Fonts (Inter, Merriweather). |
+| **Effective Google Services** | `@google/genai` (Gemini `gemini-flash-latest`), Google Cloud Run (Docker), Google Fonts (Inter, Merriweather, Noto + Indic families). |
 | **Real-World Usability** | Targets universal "navigational friction"—turning dense documents into single-tap actions for elderly patients, immigrants, busy parents, or anyone overwhelmed by bureaucracy. |
 | **Clean & Maintainable Code** | TypeScript throughout, strict interfaces, Server Action isolation, modular component architecture, full Vitest test suite. |
 
@@ -93,7 +104,7 @@ graph TD
     classDef store fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
 
     Input["Multimodal Input Zone<br/>(Text / Voice / Image)"]:::client -->|Base64 + Text Payload| SA["Next.js Server Action<br/>(src/app/actions.ts)"]:::server
-    SA -->|Secure API Key + JSON Schema| Gemini["Google Gemini 3<br/>Flash Preview"]:::ai
+    SA -->|Secure API Key + JSON Schema| Gemini["Google Gemini<br/>gemini-flash-latest"]:::ai
     Gemini -->|Strictly Typed JSON<br/>+ Logic Reasoning| SA
     SA -->|ProcessingResult| Cards["Structured Cards<br/>(Domain + Confidence + Actions)"]:::client
     Cards -->|Execute| Actions["Action Engine<br/>(.ics / mailto / reminders)"]:::client
@@ -106,16 +117,16 @@ sequenceDiagram
     actor User
     participant Browser
     participant ServerAction
-    participant Gemini3
+    participant GeminiAPI as Gemini
 
     User->>Browser: Drops a medical bill photo
-    Browser->>ServerAction: submitToGemini(base64, text)
+    Browser->>ServerAction: submitToGemini(base64, text, locale?)
     activate ServerAction
     Note right of ServerAction: API key is server-only
-    ServerAction->>Gemini3: generateContent(image + schema)
-    activate Gemini3
-    Gemini3-->>ServerAction: JSON with cards + logicReasoning
-    deactivate Gemini3
+    ServerAction->>GeminiAPI: generateContent(image + schema)
+    activate GeminiAPI
+    GeminiAPI-->>ServerAction: JSON with cards + logicReasoning
+    deactivate GeminiAPI
     ServerAction-->>Browser: ProcessingResult
     deactivate ServerAction
     Browser->>Browser: Save to localStorage timeline
@@ -131,6 +142,7 @@ graph LR
     Page --> ProcessingStage:::comp
     Page --> StructuredCardView:::comp
     Page --> HistorySidebar:::comp
+    Page --> LanguageSelector["LanguageSelector<br/>+ ThemeToggle"]:::comp
     StructuredCardView --> ActionEngine:::comp
     InputZone -->|"Web Speech API"| VoiceInput["Voice Dictation"]:::comp
     InputZone -->|"Drag & Drop"| ImageInput["Image Preview"]:::comp
@@ -141,7 +153,7 @@ graph LR
 ## 📊 Evaluation Focus Areas
 
 ### Code Quality
-- **TypeScript** with strict interfaces (`src/lib/types.ts`) — zero `any` types in application logic.
+- **TypeScript** with strict interfaces (`src/lib/types.ts`); browser APIs (e.g. speech) use narrow typings where needed.
 - **Modular architecture** — one responsibility per component (`InputZone`, `ProcessingStage`, `StructuredCard`, `ActionEngine`, `HistorySidebar`).
 - **Server/client boundary** — AI logic isolated in `src/lib/gemini.ts`, called only through the Server Action in `src/app/actions.ts`.
 
@@ -173,10 +185,10 @@ graph LR
 ### Google Services Integration
 | Service | Usage |
 |---|---|
-| **Gemini 3 Flash Preview** | Core AI engine — multimodal content generation with enforced JSON Schema output and explicit reasoning. |
+| **Gemini (`gemini-flash-latest`)** | Core AI engine — multimodal content generation with enforced JSON Schema output, explicit reasoning, and **UI-locale-aware** prompts (`submitToGemini` options). |
 | **Google Firestore** | Real-time database — powers **Family Mode** (room sync and member tracking) and **Bridge Share** (persistent shared links). |
 | **Google Cloud Run** | Production deployment — serverless, auto-scaling, zero-downtime Docker containers in `europe-west1`. |
-| **Google Fonts** | Typography — Inter (UI), Merriweather (headings) loaded via `next/font`. |
+| **Google Fonts** | Typography — Inter, Merriweather, Noto Sans (Devanagari + Latin) via `next/font`; additional **Noto** script families linked for Indic / Arabic coverage. |
 | **Google AI Studio** | API key provisioning — free tier, no credit card required. |
 
 ---
@@ -185,9 +197,10 @@ graph LR
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 15 (App Router), React 19 |
-| Styling | Tailwind CSS 4 with custom design tokens |
-| AI | `@google/genai` — Gemini 3 Flash Preview |
+| Frontend | Next.js 16 (App Router), React 19 |
+| Styling | Tailwind CSS 4 with custom design tokens (light/dark premium green) |
+| AI | `@google/genai` — **`gemini-flash-latest`** |
+| i18n | `src/lib/i18n` + `I18nProvider` + `LanguageSelector` (English + Indian locales) |
 | Testing | Vitest, React Testing Library |
 | Deployment | Google Cloud Run (Docker), Vercel |
 | Persistence | Browser localStorage |
