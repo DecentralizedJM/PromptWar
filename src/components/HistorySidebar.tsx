@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { HistoryItem } from '@/lib/types';
-import { Clock, Search, Bot, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
 import { cn } from '@/lib/utils';
 
 export function HistorySidebar({
@@ -48,13 +49,8 @@ export function HistorySidebar({
       {/* Header */}
       <div className={cn("p-6 flex items-center justify-between border-b border-border", isCollapsed && "px-4")}>
         {!isCollapsed && (
-          <div className="flex items-center gap-3 animate-slide-up">
-            <div className="w-10 h-10 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam transform -rotate-3">
-              <Bot size={24} />
-            </div>
-            <h1 className="text-xl font-heading font-black tracking-tighter text-foreground">
-              LifeBridge
-            </h1>
+          <div className="flex min-w-0 items-center gap-2 animate-slide-up">
+            <BridgeTheGapLogo size="lg" className="-translate-y-px" />
           </div>
         )}
         <button

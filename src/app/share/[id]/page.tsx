@@ -7,11 +7,11 @@ import {
   FileText,
   ShieldCheck,
   ExternalLink,
-  Bot,
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
 import { cn } from '@/lib/utils';
 
 export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,20 +34,13 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
       <div className="absolute bottom-0 left-0 w-[50vw] h-[50vh] bg-accent/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
       <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
 
-      {/* LifeBridge Header */}
+      {/* Brand header */}
       <header className="glass border-b border-border px-6 py-6 flex items-center justify-between sticky top-0 z-50">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam group-hover:scale-110 transition-transform">
-            <Bot size={22} />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-heading font-black tracking-tight leading-none group-hover:text-primary transition-colors">
-              LifeBridge
-            </h1>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30 leading-none mt-1">
-              Shared Insight
-            </p>
-          </div>
+        <Link href="/" className="flex min-w-0 items-center gap-3 group">
+          <BridgeTheGapLogo size="lg" className="shrink-0 group-hover:opacity-90 transition-opacity" />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30 leading-none">
+            Shared Insight
+          </p>
         </Link>
         <div className="text-right hidden sm:block">
           <div className="flex items-center gap-2 px-4 py-2 bg-foreground/5 border-glass rounded-2xl">
@@ -135,7 +128,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
 
                 <div className="mt-8 pt-6 border-t border-border flex items-center justify-between">
                   <div className="flex items-center gap-2 opacity-20">
-                    <Bot size={14} aria-hidden />
+                    <Sparkles size={14} aria-hidden />
                     <span className="text-[9px] font-black uppercase tracking-widest leading-none">
                       AI Synthesized Result
                     </span>

@@ -12,12 +12,12 @@ import {
   Copy,
   Check,
   LogOut,
-  Bot,
   ShieldCheck,
   UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
+import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
 import { MemberIndicator } from './MemberIndicator';
@@ -121,9 +121,7 @@ export function RoomDashboard({
       <header className="glass border-b border-border px-6 py-4 flex items-center justify-between shrink-0 z-30 relative">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
-             <div className="w-9 h-9 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam -rotate-3">
-                <Bot size={20} />
-             </div>
+             <BridgeTheGapLogo size="sm" className="-translate-y-px" />
              <div className="flex flex-col">
                 <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60 leading-none mb-1">Family Room</p>
                 <div className="flex items-center gap-2">

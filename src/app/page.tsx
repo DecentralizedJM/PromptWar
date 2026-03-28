@@ -7,6 +7,7 @@ import { InputZone } from '@/components/InputZone';
 import { ProcessingStage } from '@/components/ProcessingStage';
 import { StructuredCardView } from '@/components/StructuredCard';
 import { FamilyModeButton } from '@/components/FamilyModeButton';
+import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { WavyHover } from '@/components/WavyHover';
 import { HistoryItem, StructuredCard } from '@/lib/types';
@@ -121,12 +122,15 @@ export default function Home() {
       <div className="flex-1 flex flex-col items-center overflow-y-auto pb-32 pt-6 px-4 md:px-16 relative w-full z-10 no-scrollbar">
         <div className="w-full max-w-4xl flex-1 flex flex-col relative">
 
-          {/* Header row: Theme toggle + Family Mode */}
-          <div className="flex items-center justify-end gap-3 mb-12">
-            <ThemeToggle />
-            <FamilyModeButton
-              onRoomJoined={(code, memberId, emoji, name) => setRoom({ code, memberId, emoji, name })}
-            />
+          {/* Header row: Brand + Theme toggle + Family Mode */}
+          <div className="flex items-center justify-between gap-3 mb-12">
+            <BridgeTheGapLogo size="md" className="opacity-90" />
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <FamilyModeButton
+                onRoomJoined={(code, memberId, emoji, name) => setRoom({ code, memberId, emoji, name })}
+              />
+            </div>
           </div>
 
           {!isProcessing && !activeResults && (
