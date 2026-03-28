@@ -18,13 +18,14 @@ LifeBridge operates as a **context-aware life management assistant** that bridge
 
 The solution follows a three-phase pipeline:
 
-1. **Capture** — Accept multimodal input (typed text, voice dictation via Web Speech API, or drag-and-drop images) without requiring the user to pre-categorize anything.
-2. **Reason** — Route the raw payload to **Gemini 3 Flash Preview** with a strictly enforced JSON Schema. The model categorizes inputs into domains (`HEALTH`, `FINANCE`, `LOGISTICS`, `GOVERNMENT_LEGAL`, `GENERAL`), assigns confidence scores, flags warnings, and generates an explicit **Logic Reasoning** explanation for every decision.
-3. **Act** — Render structured output cards with one-tap action buttons (`.ics` calendar events, `mailto:` email drafts, reminders) that execute entirely on the client with zero backend dependency.
+1. **Capture** — Accept multimodal input (typed text, voice dictation, or drag-and-drop images) without requiring the user to pre-categorize anything.
+2. **Reason** — Route the raw payload to **Gemini 3 Flash Preview** with a strictly enforced JSON Schema. The model categorizes inputs into domains, assigns confidence scores, flags warnings, and generates an explicit **Logic Reasoning** explanation for every decision.
+3. **Act & Share** — Render structured output cards with one-tap action buttons. Users can generate **Bridge Share** links (7-day TTL) for read-only branded views with QR codes.
+4. **Collaborate** — Enable **Family Mode** using a 6-digit room code system. This creates a real-time **Family Health Dashboard** powered by **Google Firestore**, where multiple members can contribute and sync data instantly.
 
 ### How the Solution Works
 
-A user drops a photo of a medical bill. The image is Base64-encoded on the client, wrapped in a Next.js Server Action, and sent securely to Gemini 3 with a strict response schema. Gemini returns categorized items with status flags (`warning` for conflicts/deadlines, `success` for confirmed items) and an AI reasoning explanation. The UI renders domain-specific cards with executable actions. The entire interaction is archived in the browser's `localStorage` timeline for future reference.
+A user drops a photo of a medical bill. The image is Base64-encoded and sent securely to Gemini 3. Gemini returns categorized items with AI reasoning. In solo mode, this is archived locally. In **Family Mode**, characters join a room; every time a document is processed, it is pushed to a Firestore sub-collection. All room members see a live, merged dashboard grouped by domain (e.g., Mom's labs + Dad's insurance). Users can also click "Share" to generate a unique Firestore-backed URL that renders a branded read-only card with a QR code for easy mobile viewing.
 
 ### Assumptions Made
 
@@ -141,6 +142,7 @@ graph LR
 | Service | Usage |
 |---|---|
 | **Gemini 3 Flash Preview** | Core AI engine — multimodal content generation with enforced JSON Schema output and explicit reasoning. |
+| **Google Firestore** | Real-time database — powers **Family Mode** (room sync and member tracking) and **Bridge Share** (persistent shared links). |
 | **Google Cloud Run** | Production deployment — serverless, auto-scaling, zero-downtime Docker containers in `europe-west1`. |
 | **Google Fonts** | Typography — Inter (UI), Merriweather (headings) loaded via `next/font`. |
 | **Google AI Studio** | API key provisioning — free tier, no credit card required. |
@@ -172,10 +174,13 @@ cd PromptWar
 # 2. Install
 npm install
 
-# 3. Configure
+# Configure
 cp .env.example .env.local
-# Add your key: GEMINI_API_KEY=your_key_here
-# Get a free key at https://aistudio.google.com/apikey
+# Add your Gemini key and Firebase credentials:
+# GEMINI_API_KEY=...
+# NEXT_PUBLIC_FIREBASE_API_KEY=...
+# ... (Find other vars in .env.example)
+# Get a free gemini key at https://aistudio.google.com/apikey
 
 # 4. Run
 npm run dev

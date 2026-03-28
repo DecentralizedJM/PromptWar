@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
-import { RoomCard, StructuredCard, DomainType } from '@/lib/types';
+import { RoomCard, StructuredCard, DomainType, RoomMember, FamilyRoom } from '@/lib/types';
 import { HeartPulse, Landmark, Package, FileText, Copy, Check, LogOut } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
+import { MemberIndicator } from './MemberIndicator';
 
 interface RoomDashboardProps {
   roomCode: string;
@@ -35,17 +36,30 @@ const DOMAIN_ICONS: Record<DomainType, React.ReactNode> = {
 
 export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onLeave }: RoomDashboardProps) {
   const [cards, setCards] = useState<RoomCard[]>([]);
+  const [members, setMembers] = useState<RoomMember[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
 
-  // Real-time listener
+  // Real-time listener for cards
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'rooms', roomCode, 'cards'), snap => {
+    const unsubCards = onSnapshot(collection(db, 'rooms', roomCode, 'cards'), snap => {
       const fetched: RoomCard[] = [];
       snap.forEach(d => fetched.push(d.data() as RoomCard));
       setCards(fetched.sort((a, b) => b.addedAt - a.addedAt));
     });
-    return () => unsub();
+
+    // Real-time listener for members
+    const unsubRoom = onSnapshot(doc(db, 'rooms', roomCode), snap => {
+      if (snap.exists()) {
+        const roomData = snap.data() as FamilyRoom;
+        setMembers(roomData.members || []);
+      }
+    });
+
+    return () => {
+      unsubCards();
+      unsubRoom();
+    };
   }, [roomCode]);
 
   const processInput = async (text: string, images: { data: string; mimeType: string }[]) => {
@@ -82,26 +96,38 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
   return (
     <div className="flex flex-col h-screen bg-[#fafaf8]">
       {/* Room Header */}
-      <header className="bg-[#1a2744] text-white px-6 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-amber/80">Family Room</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xl font-mono font-black tracking-widest">{roomCode}</span>
-              <button onClick={copyCode} className="p-1 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white">
-                {codeCopied ? <Check size={14} /> : <Copy size={14} />}
+      <header className="bg-[#1a2744] text-white px-6 py-3 flex items-center justify-between shrink-0 shadow-lg z-20">
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <p className="text-[9px] font-black uppercase tracking-widest text-amber/80 leading-none mb-1">Family Room</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-mono font-black tracking-widest leading-none">{roomCode}</span>
+              <button onClick={copyCode} title="Copy Code" className="p-1 rounded-lg hover:bg-white/10 transition-colors text-white/40 hover:text-white">
+                {codeCopied ? <Check size={14} className="text-seafoam" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
+          
+          <div className="h-8 w-[1px] bg-white/10 hidden sm:block" />
+          
+          <MemberIndicator members={members} />
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="text-lg">{memberEmoji}</span>
-            <span className="text-xs text-white/70 font-medium">{memberName}</span>
+
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+            <span className="text-lg leading-none">{memberEmoji}</span>
+            <div className="flex flex-col">
+              <span className="text-[9px] font-bold text-white/40 uppercase tracking-tight leading-none">Your Persona</span>
+              <span className="text-xs text-white font-medium leading-tight">{memberName}</span>
+            </div>
           </div>
-          <button onClick={onLeave} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-bold text-white/70">
-            <LogOut size={13} />
-            Leave
+          
+          <button 
+            onClick={onLeave} 
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all text-xs font-bold border border-red-500/20"
+          >
+            <LogOut size={14} />
+            Leave Room
           </button>
         </div>
       </header>
