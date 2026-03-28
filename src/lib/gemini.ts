@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { GoogleGenAI } from '@google/genai';
 import { ProcessingResult } from './types';
-
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
-
 const responseSchema: any = {
   type: "object",
   properties: {
@@ -54,9 +50,11 @@ export async function processInputWithGemini(
   textContent: string,
   imagesBase64: { data: string, mimeType: string }[] = []
 ): Promise<ProcessingResult> {
+  const apiKey = process.env.GEMINI_API_KEY || '';
   if (!apiKey) {
-    return { cards: [], error: "Missing Gemini API Key. Please add it to your .env file." };
+    return { cards: [], error: "Missing GEMINI_API_KEY in server environment variables." };
   }
+  const ai = new GoogleGenAI({ apiKey });
 
   try {
     const prompt = `You are LifeBridge, an advanced AI that acts as a universal bridge between messy human intent and structured life-serving actions.

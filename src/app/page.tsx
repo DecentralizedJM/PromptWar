@@ -35,7 +35,7 @@ export default function Home() {
     const result = await submitToGemini(text, images);
     
     if (result.error) {
-       alert('Error from Gemini: ' + result.error + '\n\nPlease check if NEXT_PUBLIC_GEMINI_API_KEY is configured correctly.');
+       alert('Error: ' + result.error);
        setIsProcessing(false);
        return;
     }
