@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Users, X, Loader2, Plus, LogIn } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FamilyModeButtonProps {
   onRoomJoined: (roomCode: string, memberId: string, memberEmoji: string, memberName: string) => void;
@@ -30,7 +31,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
       setOpen(false); reset();
       onRoomJoined(data.roomCode, data.memberId, data.emoji, data.name);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to create room. Check Firebase config.');
+      setError(e instanceof Error ? e.message : 'Failed to create room.');
     } finally { setLoading(false); }
   };
 
@@ -45,7 +46,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
       setOpen(false); reset();
       onRoomJoined(data.roomCode, data.memberId, data.emoji, data.name);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Room not found. Check the code.');
+      setError(e instanceof Error ? e.message : 'Room not found.');
     } finally { setLoading(false); }
   };
 
@@ -53,85 +54,126 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-amber/30 text-amber bg-amber/5 hover:bg-amber/10 font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-amber"
+        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border-glass text-foreground/40 hover:text-foreground hover:bg-white/10 font-black text-[11px] uppercase tracking-widest transition-all active:scale-95"
       >
-        <Users size={15} />
+        <Users size={14} />
         Family Mode
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/30 backdrop-blur-sm" onClick={() => { if (!loading) { setOpen(false); reset(); } }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-navy/10 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-md animate-in fade-in duration-300" 
+          onClick={() => { if (!loading) { setOpen(false); reset(); } }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div 
+            className="w-full max-w-sm rounded-[2rem] bg-card border-glass shadow-navy-lg animate-slide-up overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="p-5 bg-gradient-to-br from-amber/10 to-white border-b border-navy/5 flex justify-between items-center">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-amber">Family Mode</p>
-                <h3 className="text-lg font-heading font-bold text-navy mt-0.5">
-                  {mode === 'menu' ? 'Collaborate with family' : mode === 'create' ? 'Create a room' : 'Join a room'}
+            <div className="p-6 border-b border-white/5 flex justify-between items-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Collaborative</p>
+                <h3 className="text-xl font-heading font-black tracking-tight text-foreground leading-none">
+                  {mode === 'menu' ? 'Family Mode' : mode === 'create' ? 'Create Space' : 'Join Space'}
                 </h3>
               </div>
               {!loading && (
-                <button onClick={() => { setOpen(false); reset(); }} className="p-2 rounded-full hover:bg-navy/5 text-navy/40 hover:text-navy transition-colors">
-                  <X size={18} />
+                <button 
+                  onClick={() => { setOpen(false); reset(); }} 
+                  className="p-2 rounded-xl hover:bg-white/5 text-foreground/20 hover:text-foreground transition-all relative z-10"
+                  aria-label="Close"
+                >
+                  <X size={20} />
                 </button>
               )}
             </div>
 
-            <div className="p-6">
+            <div className="p-8">
               {mode === 'menu' && (
-                <div className="space-y-3">
-                  <p className="text-sm text-navy/60 mb-4 leading-relaxed">
-                    Share a room code with family members. Everyone contributes inputs — LifeBridge merges them into one unified dashboard.
+                <div className="space-y-4">
+                  <p className="text-xs text-foreground/40 mb-6 leading-relaxed font-medium">
+                    Bridge together. Everyone contributes inputs — LifeBridge merges them into one unified dashboard.
                   </p>
-                  <button onClick={() => setMode('create')} className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-seafoam/20 hover:border-seafoam/40 hover:bg-seafoam/5 transition-all text-left group">
-                    <div className="p-2 bg-seafoam/10 rounded-xl group-hover:bg-seafoam/20 transition-colors"><Plus size={18} className="text-seafoam" /></div>
-                    <div><p className="font-bold text-navy">Create Room</p><p className="text-xs text-navy/50">Get a 6-digit code to share</p></div>
+                  <button 
+                    onClick={() => setMode('create')} 
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl bg-secondary/30 border-glass hover:bg-secondary/50 transition-all text-left group active:scale-[0.98]"
+                  >
+                    <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors text-primary">
+                      <Plus size={20} />
+                    </div>
+                    <div>
+                      <p className="font-black text-xs uppercase tracking-widest text-foreground">Create Space</p>
+                      <p className="text-[10px] text-foreground/30 font-bold mt-0.5">Generate a 6-digit code</p>
+                    </div>
                   </button>
-                  <button onClick={() => setMode('join')} className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-amber/20 hover:border-amber/40 hover:bg-amber/5 transition-all text-left group">
-                    <div className="p-2 bg-amber/10 rounded-xl group-hover:bg-amber/20 transition-colors"><LogIn size={18} className="text-amber" /></div>
-                    <div><p className="font-bold text-navy">Join Room</p><p className="text-xs text-navy/50">Enter an existing room code</p></div>
+                  <button 
+                    onClick={() => setMode('join')} 
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl bg-secondary/30 border-glass hover:bg-secondary/50 transition-all text-left group active:scale-[0.98]"
+                  >
+                    <div className="p-3 bg-accent/10 rounded-2xl group-hover:bg-accent/20 transition-colors text-accent">
+                      <LogIn size={20} />
+                    </div>
+                    <div>
+                      <p className="font-black text-xs uppercase tracking-widest text-foreground">Join Space</p>
+                      <p className="text-[10px] text-foreground/30 font-bold mt-0.5">Enter existing code</p>
+                    </div>
                   </button>
                 </div>
               )}
 
               {(mode === 'create' || mode === 'join') && (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="text-xs font-bold text-navy/60 uppercase tracking-wider block mb-1.5">Your Name (optional)</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 block mb-2">Display Name</label>
                     <input
                       type="text"
+                      autoFocus
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      placeholder="e.g. Mom, Dad, Grandma..."
+                      placeholder="e.g. Mom, Dad, Alex"
                       maxLength={20}
-                      className="w-full px-4 py-2.5 border border-navy/15 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-seafoam bg-warmWhite"
+                      className="w-full px-5 py-3 bg-secondary/30 border-glass rounded-xl text-sm font-bold text-foreground placeholder:text-foreground/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
 
                   {mode === 'join' && (
                     <div>
-                      <label className="text-xs font-bold text-navy/60 uppercase tracking-wider block mb-1.5">Room Code</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 block mb-2">Room Code</label>
                       <input
                         type="text"
                         value={code}
                         onChange={e => setCode(e.target.value.toUpperCase().slice(0, 6))}
                         placeholder="A3F9K2"
-                        className="w-full px-4 py-2.5 border border-navy/15 rounded-xl text-sm font-mono text-center text-lg tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-amber bg-warmWhite uppercase"
+                        className="w-full px-5 py-4 bg-secondary/30 border-glass rounded-xl text-xl font-mono text-center font-black tracking-[0.5em] text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 uppercase"
                       />
                     </div>
                   )}
 
-                  {error && <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+                  {error && (
+                    <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-[10px] font-bold text-destructive uppercase tracking-widest flex items-center gap-2">
+                       <X size={12} /> {error}
+                    </div>
+                  )}
 
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={() => { setMode('menu'); setError(''); }} className="flex-1 px-4 py-2.5 border border-navy/15 rounded-xl text-sm font-bold text-navy/60 hover:bg-navy/5 transition-colors">Back</button>
+                  <div className="flex gap-3 pt-2">
+                    <button 
+                      onClick={() => { setMode('menu'); setError(''); }} 
+                      className="flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-foreground/30 hover:text-foreground hover:bg-white/5 transition-all"
+                    >
+                      Back
+                    </button>
                     <button
                       onClick={mode === 'create' ? createRoom : joinRoom}
                       disabled={loading}
-                      className="flex-2 flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-navy hover:bg-navy/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className={cn(
+                        "flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary-foreground transition-all flex items-center justify-center gap-2 active:scale-95 shadow-glow-seafoam",
+                        mode === 'create' ? "bg-primary" : "bg-accent shadow-glow-amber"
+                      )}
                     >
-                      {loading && <Loader2 size={14} className="animate-spin" />}
-                      {mode === 'create' ? 'Create Room' : 'Join Room'}
+                      {loading ? <Loader2 size={14} className="animate-spin" /> : (mode === 'create' ? 'Create' : 'Join')}
                     </button>
                   </div>
                 </div>

@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { RoomCard, StructuredCard, DomainType, RoomMember, FamilyRoom } from '@/lib/types';
-import { HeartPulse, Landmark, Package, FileText, Copy, Check, LogOut } from 'lucide-react';
+import { HeartPulse, Landmark, Package, FileText, Copy, Check, LogOut, Bot, ShieldCheck, UserCircle2 } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
 import { MemberIndicator } from './MemberIndicator';
+import { cn } from '@/lib/utils';
 
 interface RoomDashboardProps {
   roomCode: string;
@@ -18,20 +19,11 @@ interface RoomDashboardProps {
   onLeave: () => void;
 }
 
-const DOMAIN_COLORS: Record<DomainType, string> = {
-  HEALTH: 'bg-amber/5 border-amber/20',
-  FINANCE: 'bg-seafoam/5 border-seafoam/20',
-  LOGISTICS: 'bg-navy/5 border-navy/10',
-  GOVERNMENT_LEGAL: 'bg-amber/5 border-amber/20',
-  GENERAL: 'bg-gray-50 border-gray-100',
-};
-
-const DOMAIN_ICONS: Record<DomainType, React.ReactNode> = {
-  HEALTH: <HeartPulse size={16} className="text-amber" />,
-  FINANCE: <Landmark size={16} className="text-seafoam" />,
-  LOGISTICS: <Package size={16} className="text-navy/70" />,
-  GOVERNMENT_LEGAL: <FileText size={16} className="text-amber" />,
-  GENERAL: <FileText size={16} className="text-navy/40" />,
+const DOMAIN_MAP: Record<string, { class: string, text: string, icon: any }> = {
+  'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
+  'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
+  'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
+  'GOVERNMENT_LEGAL': { class: 'border-l-legal', text: 'text-legal', icon: FileText },
 };
 
 export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onLeave }: RoomDashboardProps) {
@@ -94,37 +86,52 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
   }, {});
 
   return (
-    <div className="flex flex-col h-screen bg-[#fafaf8]">
+    <div className="flex flex-col h-screen bg-background text-foreground relative overflow-hidden selection:bg-primary/30">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 w-[40vw] h-[40vh] bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-primary/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
       {/* Room Header */}
-      <header className="bg-[#1a2744] text-white px-6 py-3 flex items-center justify-between shrink-0 shadow-lg z-20">
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col">
-            <p className="text-[9px] font-black uppercase tracking-widest text-amber/80 leading-none mb-1">Family Room</p>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-mono font-black tracking-widest leading-none">{roomCode}</span>
-              <button onClick={copyCode} title="Copy Code" className="p-1 rounded-lg hover:bg-white/10 transition-colors text-white/40 hover:text-white">
-                {codeCopied ? <Check size={14} className="text-seafoam" /> : <Copy size={14} />}
-              </button>
-            </div>
+      <header className="glass border-b border-white/5 px-6 py-4 flex items-center justify-between shrink-0 z-30 relative">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-3">
+             <div className="w-9 h-9 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam -rotate-3">
+                <Bot size={20} />
+             </div>
+             <div className="flex flex-col">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60 leading-none mb-1">Family Room</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-mono font-black tracking-widest leading-none">{roomCode}</span>
+                  <button 
+                    onClick={copyCode} 
+                    className="p-1 px-2 rounded-lg bg-white/5 border-glass text-foreground/20 hover:text-foreground transition-all flex items-center gap-1.5"
+                  >
+                    {codeCopied ? <Check size={12} className="text-health" /> : <Copy size={12} />}
+                    <span className="text-[10px] font-black uppercase tracking-widest">{codeCopied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+             </div>
           </div>
           
-          <div className="h-8 w-[1px] bg-white/10 hidden sm:block" />
+          <div className="h-10 w-px bg-white/5 hidden sm:block" />
           
-          <MemberIndicator members={members} />
+          <div className="hidden sm:block">
+            <MemberIndicator members={members} />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
-            <span className="text-lg leading-none">{memberEmoji}</span>
+          <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border-glass">
+            <span className="text-xl leading-none">{memberEmoji}</span>
             <div className="flex flex-col">
-              <span className="text-[9px] font-bold text-white/40 uppercase tracking-tight leading-none">Your Persona</span>
-              <span className="text-xs text-white font-medium leading-tight">{memberName}</span>
+              <span className="text-[9px] font-black text-foreground/30 uppercase tracking-widest leading-none">Perspective</span>
+              <span className="text-xs text-foreground font-black leading-tight mt-0.5">{memberName}</span>
             </div>
           </div>
           
           <button 
             onClick={onLeave} 
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all text-xs font-bold border border-red-500/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-destructive/10 hover:bg-destructive/20 text-destructive text-[11px] font-black uppercase tracking-widest border border-destructive/20 transition-all active:scale-95"
           >
             <LogOut size={14} />
             Leave Room
@@ -132,62 +139,123 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Input Panel */}
-        <div className="md:w-96 shrink-0 p-4 border-b md:border-b-0 md:border-r border-navy/10 overflow-y-auto">
-          <p className="text-xs font-bold text-navy/40 uppercase tracking-wider mb-3">Your Contribution</p>
-          {isProcessing ? <ProcessingStage /> : (
-            <InputZone onSubmit={processInput} isProcessing={isProcessing} />
-          )}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-20">
+        {/* Left Panel: Contribution (Sidebar-style) */}
+        <div className="md:w-[400px] shrink-0 p-8 glass border-r border-white/5 overflow-y-auto no-scrollbar">
+          <div className="flex items-center gap-3 mb-8">
+             <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center text-accent">
+                <UserCircle2 size={18} />
+             </div>
+             <h2 className="text-xs font-black text-foreground/30 uppercase tracking-[0.3em]">Your Addition</h2>
+          </div>
+          
+          <div className="relative">
+            {isProcessing ? (
+               <div className="scale-75 origin-top -mt-10">
+                 <ProcessingStage />
+               </div>
+            ) : (
+              <InputZone onSubmit={processInput} isProcessing={isProcessing} />
+            )}
+          </div>
+          
+          <div className="mt-12 p-6 rounded-2xl bg-white/5 border-glass border-dashed">
+             <p className="text-[11px] leading-relaxed text-foreground/40 font-medium italic">
+                "Contributions here are instantly synthesized and reflected on the shared family dashboard in real-time."
+             </p>
+          </div>
         </div>
 
-        {/* Merged Dashboard */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          <h2 className="text-sm font-bold text-navy/40 uppercase tracking-widest mb-4">
-            Family Dashboard · {cards.length} insight{cards.length !== 1 ? 's' : ''}
-          </h2>
-
-          {cards.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-center text-navy/30">
-              <span className="text-4xl mb-3">🏠</span>
-              <p className="text-sm font-medium">Waiting for family members to add inputs…</p>
-              <p className="text-xs mt-1">Share your room code: <span className="font-mono font-bold">{roomCode}</span></p>
+        {/* Right Panel: Merged Dashboard */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-12 no-scrollbar">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex flex-col">
+                <h2 className="text-sm font-black text-foreground/30 uppercase tracking-[0.3em] mb-1">Collaborative Matrix</h2>
+                <p className="text-3xl font-black tracking-tight">{cards.length} Active Insight{cards.length !== 1 ? 's' : ''}</p>
+              </div>
+              <div className="p-3 px-5 rounded-2xl bg-white/5 border-glass flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-health animate-pulse" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Live Sync Active</span>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {(Object.entries(grouped) as [DomainType, RoomCard[]][]).map(([domain, domainCards]) => (
-                <div key={domain}>
-                  <div className="flex items-center gap-2 mb-3">
-                    {DOMAIN_ICONS[domain]}
-                    <h3 className="text-xs font-black uppercase tracking-widest text-navy/60">{domain.replace('_', ' ')}</h3>
-                    <span className="text-[10px] bg-navy/5 text-navy/40 px-2 py-0.5 rounded-full font-bold">{domainCards.length}</span>
-                  </div>
-                  <div className={`rounded-xl border p-4 space-y-3 ${DOMAIN_COLORS[domain]}`}>
-                    {domainCards.map(card => (
-                      <div key={card.id} className="bg-white rounded-xl p-3 shadow-sm border border-white">
-                        <div className="flex justify-between items-start mb-1">
-                          <p className="text-sm font-bold text-navy">{card.title}</p>
-                          <span className="text-sm" title={card.contributedBy}>{card.contributorEmoji}</span>
+
+            {cards.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center animate-in fade-in zoom-in-95 duration-700">
+                <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 flex items-center justify-center text-5xl mb-6 shadow-2xl">🏠</div>
+                <h3 className="text-xl font-heading font-black tracking-tight mb-2">Populating the Space...</h3>
+                <p className="text-foreground/40 text-sm font-medium max-w-xs">Waiting for contributions. Share your code <span className="text-accent font-black tracking-widest">{roomCode}</span> to start bridging together.</p>
+              </div>
+            ) : (
+              <div className="space-y-12 pb-24">
+                {(Object.entries(grouped) as [DomainType, RoomCard[]][]).map(([domain, domainCards]) => {
+                  const info = DOMAIN_MAP[domain] || { class: 'border-l-muted', text: 'text-muted-foreground', icon: FileText };
+                  const Icon = info.icon;
+                  
+                  return (
+                    <div key={domain} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className={cn("p-2 rounded-xl bg-white/5 border-glass", info.text)}>
+                          <Icon size={18} />
                         </div>
-                        <p className="text-xs text-navy/60 leading-relaxed mb-2">{card.summary}</p>
-                        {card.items.map((item, i) => (
-                          <div key={i} className={`flex justify-between text-xs px-2 py-1 rounded-lg mt-1 ${
-                            item.status === 'warning' ? 'bg-amber/10 text-amber' :
-                            item.status === 'success' ? 'bg-seafoam/10 text-seafoam' :
-                            'bg-navy/5 text-navy/70'
-                          }`}>
-                            <span className="font-bold uppercase tracking-wide opacity-60">{item.label}</span>
-                            <span>{item.value}</span>
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em]">{domain.replace('_', ' ')}</h3>
+                        <div className="h-px flex-1 bg-white/5" />
+                        <span className="text-[10px] font-mono font-black text-foreground/20">{domainCards.length} UNITS</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-6">
+                        {domainCards.map((card, idx) => (
+                          <div 
+                            key={card.id} 
+                            className={cn(
+                              "relative group rounded-2xl bg-card/40 backdrop-blur-xl border-glass border-l-4 p-6 shadow-navy transition-all duration-300 hover:translate-y-[-2px] hover:shadow-navy-lg",
+                              info.class
+                            )}
+                          >
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h4 className="text-lg font-heading font-black tracking-tight text-foreground">{card.title}</h4>
+                                <p className="text-xs text-foreground/60 font-medium leading-relaxed mt-1">{card.summary}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-lg" title={card.contributedBy}>{card.contributorEmoji}</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-foreground/20">{card.contributedBy}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2">
+                              {card.items.map((item, i) => (
+                                <div key={i} className={cn(
+                                  "px-3 py-1.5 rounded-xl border-glass flex items-center gap-3",
+                                  item.status === 'warning' ? 'bg-accent/10 text-accent' :
+                                  item.status === 'success' ? 'bg-health/10 text-health' :
+                                  'bg-white/5 text-foreground/70'
+                                )}>
+                                  <span className="text-[9px] font-black uppercase tracking-widest opacity-60 shrink-0">{item.label}</span>
+                                  <span className="text-[11px] font-bold font-mono tracking-tight">{item.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            {/* Metadata footer */}
+                            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                               <div className="flex items-center gap-2 text-primary/50">
+                                  <ShieldCheck size={12} />
+                                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">Gemini Verified</span>
+                               </div>
+                               <span className="text-[10px] font-mono font-black text-foreground/10">
+                                  {new Date(card.addedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                               </span>
+                            </div>
                           </div>
                         ))}
-                        <p className="text-[9px] text-navy/30 mt-2 font-medium">Added by {card.contributorEmoji} {card.contributedBy}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

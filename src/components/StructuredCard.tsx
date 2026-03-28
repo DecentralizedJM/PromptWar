@@ -1,78 +1,124 @@
 'use client';
 
+import { useState } from 'react';
 import { StructuredCard } from '@/lib/types';
-import { ShieldCheck, HeartPulse, Landmark, Package, FileText } from 'lucide-react';
+import { ShieldCheck, HeartPulse, Landmark, Package, FileText, Search, Info } from 'lucide-react';
 import { ActionEngine } from './ActionEngine';
 import { ShareButton } from './ShareButton';
+import { cn } from '@/lib/utils';
 
-export function StructuredCardView({ card, allCards }: { card: StructuredCard; allCards?: StructuredCard[] }) {
-  const getDomainIcon = (domain: string) => {
-    switch (domain) {
-      case 'HEALTH': return <HeartPulse className="text-amber" />;
-      case 'FINANCE': return <Landmark className="text-seafoam" />;
-      case 'LOGISTICS': return <Package className="text-navy" />;
-      case 'GOVERNMENT_LEGAL': return <FileText className="text-amber" />;
-      default: return <FileText className="text-navy/60" />;
-    }
+export function StructuredCardView({ card, allCards, index = 0 }: { card: StructuredCard; allCards?: StructuredCard[]; index?: number }) {
+  const [showVerify, setShowVerify] = useState(false);
+
+  const domainMap: Record<string, { class: string, text: string, icon: any }> = {
+    'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
+    'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
+    'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
+    'GOVERNMENT_LEGAL': { class: 'border-l-legal', text: 'text-legal', icon: FileText },
+  };
+
+  const domainInfo = domainMap[card.domain] || { class: 'border-l-muted', text: 'text-muted-foreground', icon: FileText };
+  const Icon = domainInfo.icon;
+
+  const confidenceColor = (c: number) => {
+    if (c >= 85) return 'bg-primary';
+    if (c >= 60) return 'bg-finance';
+    return 'bg-destructive';
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-navy/10 overflow-hidden flex flex-col transition-all hover:shadow-md animate-shatter-merge">
-      {/* Header */}
-      <div className="p-5 border-b border-navy/5 bg-gradient-to-br from-white to-navy/[0.02]">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-warmWhite rounded-xl border border-navy/5">
-              {getDomainIcon(card.domain)}
+    <article
+      className={cn(
+        "animate-slide-up rounded-2xl bg-card/40 backdrop-blur-xl border-glass border-l-4 shadow-navy hover:translate-y-[-2px] hover:shadow-navy-lg transition-all duration-300 overflow-hidden",
+        domainInfo.class
+      )}
+      style={{ animationDelay: `${index * 150}ms` }}
+    >
+      {/* Header Section */}
+      <div className="p-6 pb-0">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className={cn("p-2.5 rounded-xl bg-white/5 border-glass", domainInfo.text)}>
+              <Icon size={24} />
             </div>
             <div>
-              <p className="text-xs font-bold tracking-wider text-navy/50 uppercase">{card.domain.replace('_', ' ')}</p>
-              <h3 className="text-lg font-heading font-bold text-navy">{card.title}</h3>
+              <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] mb-0.5 opacity-60", domainInfo.text)}>
+                {card.domain.replace('_', ' ')}
+              </p>
+              <h3 className="text-lg font-heading font-black tracking-tight text-foreground">{card.title}</h3>
             </div>
           </div>
+
           <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-seafoam/10 text-seafoam">
-              <ShieldCheck size={14} /> verified
+            <div className="flex items-center gap-2 min-w-[100px]">
+               <span className="text-[10px] font-mono text-foreground/40 font-bold uppercase tracking-wider">Confidence</span>
+               <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                 <div 
+                   className={cn("h-full rounded-full transition-all duration-1000", confidenceColor(card.confidenceScore))}
+                   style={{ width: `${card.confidenceScore}%` }}
+                   role="progressbar"
+                   aria-valuenow={card.confidenceScore}
+                 />
+               </div>
+               <span className="text-[10px] font-mono font-bold text-foreground/60">{card.confidenceScore}%</span>
             </div>
-            <div className="text-[10px] text-navy/40 uppercase tracking-wide">
-              {card.confidenceScore >= 90 ? 'High Confidence' : 'Review Suggested'}
-            </div>
-            {/* Share button */}
             <ShareButton cards={allCards ?? [card]} title={card.title} />
           </div>
         </div>
-        <p className="text-sm text-navy/70 leading-relaxed mt-3">{card.summary}</p>
-
-        {/* Logic Reasoning Badge */}
-        <div className="mt-4 p-3 bg-seafoam/5 border border-seafoam/10 rounded-xl flex items-start gap-3 animate-pulse-glow">
-          <div className="text-seafoam mt-[2px] shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
-          </div>
-          <p className="text-[11px] leading-relaxed font-semibold italic text-seafoam/80">
-            <span className="uppercase text-[9px] not-italic font-black tracking-widest block mb-0.5 opacity-60">AI Insight</span>
-            {card.logicReasoning}
-          </p>
-        </div>
+        
+        <p className="mt-4 text-sm text-foreground/70 leading-relaxed font-medium">
+          {card.summary}
+        </p>
       </div>
 
-      {/* Items List */}
-      <div className="p-5 flex-1 flex flex-col gap-3 bg-white">
+      {/* Structured Elements */}
+      <div className="p-6 space-y-3">
         {card.items.map((item, idx) => (
-          <div key={idx} className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-            item.status === 'warning' ? 'bg-amber/5 border-amber/20' :
-            item.status === 'success' ? 'bg-seafoam/5 border-seafoam/20' :
-            'bg-warmWhite border-transparent'
-          }`}>
-            <span className="text-xs font-bold text-navy/60 uppercase tracking-widest">{item.label}</span>
-            <span className={`text-sm font-medium text-right ${
-              item.status === 'warning' ? 'text-amber' :
-              item.status === 'success' ? 'text-seafoam' :
-              'text-navy'
-            }`}>{item.value}</span>
+          <div key={idx} className="flex items-baseline gap-4 group">
+            <span className="text-[11px] font-bold text-foreground/30 uppercase tracking-widest min-w-[120px] shrink-0 group-hover:text-foreground/50 transition-colors">
+              {item.label}
+            </span>
+            <div className="flex-1 border-b border-dashed border-white/5 mb-[0.3rem]" />
+            <span className={cn(
+              "text-sm font-mono font-bold tracking-tight",
+              item.status === 'warning' ? 'text-finance' : 
+              item.status === 'success' ? 'text-health' : 
+              'text-foreground/90'
+            )}>
+              {item.value}
+            </span>
           </div>
         ))}
-        <ActionEngine card={card} />
       </div>
-    </div>
+
+      {/* Verification / AI Logic Section */}
+      {showVerify && (
+        <div className="mx-6 mb-4 p-5 rounded-2xl bg-secondary/30 border-glass animate-crystallize">
+          <div className="flex items-center gap-2 text-primary font-black uppercase text-[10px] tracking-widest mb-2">
+            <ShieldCheck size={14} />
+            AI Reasoning & Verification
+          </div>
+          <p className="text-xs leading-relaxed text-foreground/60 font-medium italic">
+            "{card.logicReasoning}"
+          </p>
+        </div>
+      )}
+
+      {/* Footer Actions */}
+      <div className="px-6 pb-6 flex flex-wrap items-center gap-3">
+        <ActionEngine card={card} />
+        
+        <button
+          onClick={() => setShowVerify(!showVerify)}
+          className={cn(
+            "px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-2 border-glass",
+            showVerify ? "bg-primary text-primary-foreground" : "bg-white/5 text-foreground/40 hover:text-foreground hover:bg-white/10"
+          )}
+        >
+          {showVerify ? <Info size={14} /> : <Search size={14} />}
+          {showVerify ? "Hide Insight" : "View Insight"}
+        </button>
+      </div>
+    </article>
   );
 }
