@@ -5,20 +5,79 @@
 LifeBridge is a Next.js web application powered by **Gemini 3**. It targets a specific, high-friction problem: navigating confusing real-world information (prescription details, legal letters, dense utility bills). By photographing, dragging, or dictating this raw data to LifeBridge, the application instantly structures, categorizes, and provides single-tap executable actions (e.g., adding a deadline to a calendar, drafting an email response) strictly via local, secure processes.
 
 ## 🎯 Core Problem Statement
-The modern world runs on systems that require expertise to navigate, yet present that information chaotically to the end user. LifeBridge eliminates that friction entirely. 
+The modern world runs on systems that require expertise to navigate, yet present that information chaotically to the end user. LifeBridge eliminates that friction entirely.
 **Success State:** Users throw a mess of photos or voice notes at the UI, and within 3 seconds, they receive beautifully categorized Next Steps securely.
 
-## ⚡ Tech Stack & Architecture
+---
 
-- **Frontend:** Next.js 15 (App Router), React 19, Vanilla Tailwind CSS
-- **AI Processing:** `@google/genai` (Gemini 3 Flash Preview) with strict JSON Schema enforced structured outputs.
-- **Multimodal Inputs:** Native HTML5 Drag and Drop API, Web Speech API for voice dictation.
-- **Data Persistence:** LocalStorage (zero-latency, absolute privacy for history logs).
-- **Icons & UI:** `lucide-react`, Custom CSS Keyframe Animations (Neural Bridge effect).
+## 🏗 Architecture & Data Flow
+
+LifeBridge employs a strictly structured Server Action setup. The Google Gemini API key is never exposed to the client-side JavaScript bundle, ensuring secure and private parsing of sensitive documents.
+
+### System Architecture Diagram
+```mermaid
+graph TD
+    classDef client fill:#f0f9ff,stroke:#0ea5e9,stroke-width:2px;
+    classDef server fill:#fdf4ff,stroke:#d946ef,stroke-width:2px;
+    classDef ai fill:#f0fdf4,stroke:#22c55e,stroke-width:2px;
+
+    Client[Client UI: InputZone]:::client -->|Multimodal Payload: Base64 / Text| ServerAction[Next.js Server Action]:::server
+    ServerAction -->|Secure API Key & Schema| Gemini[Google Gemini 3 API]:::ai
+    Gemini -->|Enforced JSON Schema| ServerAction
+    ServerAction -->|Parsed ProcessingResult| ClientUI[Client UI: StructuredCard]:::client
+    ClientUI -->|Push State| ActionEngine[Action Engine: .ics / mailto]:::client
+    ClientUI -.->|Save Archive| LocalStorage[(Local Storage)]:::client
+```
+
+### Process Flow Diagram
+```mermaid
+sequenceDiagram
+    actor User
+    participant Browser
+    participant Server
+    participant Gemini3
+
+    User->>Browser: Uploads Medical Bill (Image)
+    Browser->>Server: submitToGemini(imageBase64)
+    activate Server
+    Server->>Gemini3: generateContent(image + JSON Schema prompt)
+    activate Gemini3
+    Gemini3-->>Server: Strictly Typed JSON Response
+    deactivate Gemini3
+    Server-->>Browser: ProcessingResult (Domain: FINANCE/HEALTH)
+    deactivate Server
+    Browser->>Browser: Saves to localStorage Timeline
+    Browser->>User: Displays Structured Card + "Add Reminders" btn
+```
+
+---
+
+## ⚡ Tech Stack & Libraries
+
+- **Frontend Core:** Next.js 15 (App Router), React 19
+- **Styling:** Vanilla Tailwind CSS (Performance-oriented, pure CSS animations)
+- **AI Processing:** `@google/genai` (Gemini 3 Flash Preview SDK)
+- **Testing:** Vitest & React Testing Library (Unit + Component testing suites)
+- **Data Persistence:** Browser `LocalStorage` (zero-latency, absolute privacy for history logs)
+- **Icons & UI:** `lucide-react`
+- **Utility:** `file-saver` (For local standard `.ics` buffer generation)
 
 ### 💳 Google Services & Free Tiers
 *This application relies on the Google Gemini API to operate. You must provide your own API key.*
 - **Gemini API:** Utilizes the Free Tier (Up to 15 Requests Per Minute / 1 million tokens per minute limit). Absolutely free of charge for prototyping. No credit card required.
+
+---
+
+## 🧪 Testing Coverage
+LifeBridge includes competitive test coverage validating core multimodal parsing and component rendering safely.
+
+### Running Tests
+```bash
+npm run test
+```
+*(Tests use Vitest against the mock `@google/genai` logic and structural layout renders).*
+
+---
 
 ## 🚀 Local Development Setup
 
@@ -51,6 +110,8 @@ npm run dev
 ```
 Open `http://localhost:3000` to view the app.
 
+---
+
 ## ☁️ Deployment (Vercel)
 
 This application is structurally optimized and pre-configured for a zero-friction Vercel deployment. Wait times on cold boots have been preemptively minimized.
@@ -70,9 +131,13 @@ npm run deploy
 **Custom Domain Instructions:**
 Once deployed on Vercel, navigate to **Settings > Domains**. Enter your custom domain (e.g., `lifebridge.app`), and Vercel will automatically provision specific A Records or CNAME configurations for you to add to your DNS provider (e.g., Cloudflare or Namecheap). SSL provisioning is handled automatically.
 
+---
+
 ## 🔒 Security & Privacy Guarantees
 - The Gemini generation executes entirely on a Next.js Server Action (`src/lib/gemini.ts`), shielding your `GEMINI_API_KEY` from the client.
-- Your timeline data and generated documents are stored exclusively in the browser's `localStorage` — no databases are exposed or retained in the backend.
+- Your timeline data and generated documents are stored exclusively in the browser\'s `localStorage` — no databases are exposed or retained in the backend.
 
 ---
-*Built with speed, precision, and obsession for the end-user by [PromptSmith / Antigravity Agent].*
+
+## 📜 License
+This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details. Built and submitted for competition by [PromptSmith / Antigravity Agent].
