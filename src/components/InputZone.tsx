@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 type InputMode = 'upload' | 'voice' | 'paste' | 'url';
 
 const VOICE_UNSUPPORTED =
-  'Voice input needs a Chromium-based browser (Chrome or Edge) with microphone access.';
-const VOICE_PERMISSION = 'Microphone blocked. Allow access in your browser settings and try again.';
+  'Voice needs Chrome or Edge with microphone access. If it still fails, check site permissions (lock icon → allow mic).';
+const VOICE_PERMISSION = 'Microphone blocked. Allow microphone for this site in your browser settings.';
 
 export function InputZone({
   onSubmit,
@@ -20,131 +20,190 @@ export function InputZone({
   isProcessing: boolean;
 }) {
   const [activeMode, setActiveMode] = useState<InputMode>('upload');
+  /** Typed text: upload captions + paste mode (not voice transcript). */
   const [text, setText] = useState('');
-  const [interimText, setInterimText] = useState('');
+  const [voiceFinal, setVoiceFinal] = useState('');
+  const [voiceInterim, setVoiceInterim] = useState('');
   const [url, setUrl] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [images, setImages] = useState<{ data: string; mimeType: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [speechReady, setSpeechReady] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<{
-    lang: string;
-    continuous: boolean;
-    interimResults: boolean;
-    start: () => void;
-    stop: () => void;
-    onresult: ((e: {
-      resultIndex: number;
-      results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
-    }) => void) | null;
-    onerror: ((e: { error: string; message?: string }) => void) | null;
-    onend: (() => void) | null;
-  } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Web Speech API differs per browser
+  const recognitionRef = useRef<any>(null);
+  /** User wants listening active (mic on). */
   const listeningIntentRef = useRef(false);
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    setSpeechReady(Boolean((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition));
+  }, []);
+
+  const stopRecognition = useCallback(() => {
+    listeningIntentRef.current = false;
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+    const r = recognitionRef.current;
+    recognitionRef.current = null;
+    if (r) {
+      try {
+        r.onend = null;
+        r.onerror = null;
+        r.onresult = null;
+        r.stop();
+      } catch {
+        /* already stopped */
+      }
+    }
+    setIsRecording(false);
+  }, []);
+
+  const appendInterimToFinal = useCallback(() => {
+    setVoiceInterim((prev) => {
+      if (prev) {
+        setVoiceFinal((f) => (f + (f && !f.endsWith(' ') ? ' ' : '') + prev).trim());
+      }
+      return '';
+    });
+  }, []);
+
+  const startRecognition = useCallback(() => {
     if (typeof window === 'undefined') return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
-      setVoiceSupported(false);
+      setVoiceError(VOICE_UNSUPPORTED);
       return;
     }
-    setVoiceSupported(true);
-    const recognition = new SR() as NonNullable<typeof recognitionRef.current>;
+
+    stopRecognition();
+    setVoiceError(null);
+    setVoiceFinal('');
+    setVoiceInterim('');
+
+    const recognition: any = new SR();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = getBrowserSpeechLang();
+    if ('maxAlternatives' in recognition) recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: {
+      resultIndex: number;
+      results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+    }) => {
       let interim = '';
       let nextFinal = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const piece = event.results[i]![0]!.transcript;
-        if (event.results[i]!.isFinal) {
+        const row = event.results[i]!;
+        const piece = row[0]!.transcript;
+        if (row.isFinal) {
           nextFinal += piece;
         } else {
           interim += piece;
         }
       }
       if (nextFinal) {
-        setText((prev) => (prev + nextFinal + ' ').trimStart());
-        setInterimText('');
+        setVoiceFinal((prev) => (prev + nextFinal + ' ').trimStart());
+        setVoiceInterim('');
       } else {
-        setInterimText(interim);
+        setVoiceInterim(interim);
       }
     };
 
     recognition.onerror = (event: { error: string; message?: string }) => {
-      listeningIntentRef.current = false;
-      setIsRecording(false);
+      if (event.error === 'aborted') return;
+      if (event.error === 'no-speech') {
+        /* Common during pauses; keep session if user still wants to record */
+        return;
+      }
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        listeningIntentRef.current = false;
+        recognitionRef.current = null;
+        setIsRecording(false);
         setVoiceError(VOICE_PERMISSION);
-      } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
-        setVoiceError(event.message || event.error);
+        return;
+      }
+      /* network, audio-capture, etc. */
+      if (listeningIntentRef.current) {
+        setVoiceError(event.message || `Speech error: ${event.error}`);
       }
     };
 
     recognition.onend = () => {
       if (!listeningIntentRef.current) {
+        recognitionRef.current = null;
         setIsRecording(false);
         return;
       }
-      try {
-        recognition.start();
-        setIsRecording(true);
-      } catch {
-        setIsRecording(false);
-        listeningIntentRef.current = false;
-      }
+      /* Chrome ends the session after silence; restart shortly so one mic tap keeps listening */
+      restartTimerRef.current = setTimeout(() => {
+        restartTimerRef.current = null;
+        if (!listeningIntentRef.current) return;
+        const current = recognitionRef.current;
+        if (!current) return;
+        try {
+          current.start();
+        } catch {
+          listeningIntentRef.current = false;
+          recognitionRef.current = null;
+          setIsRecording(false);
+          setVoiceError('Voice session ended. Tap the mic again to continue.');
+        }
+      }, 120);
     };
 
-    recognitionRef.current = recognition;
-    return () => {
-      listeningIntentRef.current = false;
-      try {
-        recognition.stop();
-      } catch {
-        /* already stopped */
-      }
-      recognitionRef.current = null;
-    };
-  }, []);
-
-  const toggleRecording = () => {
-    setVoiceError(null);
-    const recognition = recognitionRef.current;
-    if (!voiceSupported || !recognition) {
-      setVoiceError(VOICE_UNSUPPORTED);
-      return;
-    }
-    if (isRecording) {
-      listeningIntentRef.current = false;
-      try {
-        recognition.stop();
-      } catch {
-        /* ignore */
-      }
-      setIsRecording(false);
-      setInterimText((prev) => {
-        if (prev) setText((t0) => (t0 + (t0 && !t0.endsWith(' ') ? ' ' : '') + prev).trim());
-        return '';
-      });
-      return;
-    }
-    setText('');
-    setInterimText('');
     listeningIntentRef.current = true;
+    recognitionRef.current = recognition;
+
     try {
       recognition.start();
       setIsRecording(true);
     } catch {
       listeningIntentRef.current = false;
+      recognitionRef.current = null;
       setIsRecording(false);
       setVoiceError(VOICE_UNSUPPORTED);
     }
+  }, [stopRecognition]);
+
+  useEffect(() => {
+    return () => {
+      listeningIntentRef.current = false;
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+      const r = recognitionRef.current;
+      recognitionRef.current = null;
+      if (r) {
+        try {
+          r.stop();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+  }, []);
+
+  /* Stop mic when leaving voice tab */
+  useEffect(() => {
+    if (activeMode !== 'voice') {
+      stopRecognition();
+    }
+  }, [activeMode, stopRecognition]);
+
+  const toggleRecording = () => {
+    if (!speechReady) {
+      setVoiceError(VOICE_UNSUPPORTED);
+      return;
+    }
+    if (isRecording || listeningIntentRef.current) {
+      appendInterimToFinal();
+      stopRecognition();
+      return;
+    }
+    startRecognition();
   };
 
   const handleFile = (file: File) => {
@@ -166,18 +225,25 @@ export function InputZone({
     }
   }, []);
 
-  const voiceDisplay = [text, interimText].filter(Boolean).join(text && interimText ? ' ' : '') || '';
+  const voiceDisplay =
+    [voiceFinal, voiceInterim].filter(Boolean).join(voiceFinal && voiceInterim ? ' ' : '') || '';
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    const finalContent = activeMode === 'url' ? url : activeMode === 'voice' ? voiceDisplay.trim() : text;
-    if (finalContent.trim() || images.length > 0) {
+    const fromVoice = activeMode === 'voice' ? voiceDisplay.trim() : '';
+    const fromTyped = activeMode !== 'url' && activeMode !== 'voice' ? text.trim() : '';
+    const fromUrl = activeMode === 'url' ? url.trim() : '';
+    const finalContent = activeMode === 'url' ? fromUrl : activeMode === 'voice' ? fromVoice : fromTyped;
+
+    if (finalContent || images.length > 0) {
       onSubmit(finalContent, images);
       setText('');
-      setInterimText('');
+      setVoiceFinal('');
+      setVoiceInterim('');
       setUrl('');
       setImages([]);
       setActiveMode('upload');
+      stopRecognition();
     }
   };
 
@@ -187,6 +253,12 @@ export function InputZone({
     { mode: 'paste', icon: <ClipboardPaste size={16} />, label: 'Paste' },
     { mode: 'url', icon: <Link2 size={16} />, label: 'URL' },
   ];
+
+  const canSubmitNow =
+    text.trim() ||
+    voiceDisplay.trim() ||
+    url.trim() ||
+    images.length > 0;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
@@ -229,7 +301,7 @@ export function InputZone({
       >
         <div className="flex flex-col items-center p-8 md:p-12">
           {activeMode === 'upload' && (
-            <div className="flex flex-col items-center text-center animate-slide-up">
+            <div className="flex w-full flex-col items-center text-center animate-slide-up">
               <button
                 type="button"
                 className="mb-6 flex h-16 w-16 cursor-pointer items-center justify-center rounded-2xl bg-primary/10 transition-all hover:bg-primary/20 active:scale-90"
@@ -237,10 +309,21 @@ export function InputZone({
               >
                 <Upload className="h-8 w-8 text-primary" />
               </button>
-              <h2 className="mb-2 font-heading text-xl font-black tracking-tight">Drop anything here</h2>
-              <p className="max-w-xs text-sm font-medium text-foreground/50">
-                Photos, prescriptions, documents, or messy text notes
+              <h2 className="mb-2 font-heading text-xl font-black tracking-tight">Drop images here</h2>
+              <p className="mb-6 max-w-xs text-sm font-medium text-foreground/50">
+                Photos, prescriptions, screenshots — add optional text below for context.
               </p>
+              <label className="sr-only" htmlFor="upload-context">
+                Optional text with images
+              </label>
+              <textarea
+                id="upload-context"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={4}
+                placeholder="Optional: type context, notes, or questions to go with your images…"
+                className="premium-field-light mb-2 w-full max-w-lg resize-y rounded-2xl border-glass bg-secondary/30 p-4 text-left text-base font-medium text-foreground placeholder:text-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/45"
+              />
               <input
                 ref={fileInputRef}
                 type="file"
@@ -263,10 +346,10 @@ export function InputZone({
                 <button
                   type="button"
                   onClick={toggleRecording}
-                  disabled={!voiceSupported}
+                  disabled={!speechReady}
                   className={cn(
                     'relative z-10 flex h-20 w-20 items-center justify-center rounded-full transition-all active:scale-90',
-                    !voiceSupported && 'cursor-not-allowed opacity-50',
+                    !speechReady && 'cursor-not-allowed opacity-50',
                     isRecording ? 'bg-red-500 text-white' : 'bg-primary text-primary-foreground'
                   )}
                 >
@@ -274,12 +357,15 @@ export function InputZone({
                 </button>
               </div>
               <h2 className="mb-2 font-heading text-xl font-black tracking-tight">
-                {isRecording ? 'Listening…' : 'Tap to record'}
+                {isRecording ? 'Listening…' : 'Tap to speak'}
               </h2>
-              <p className="min-h-[4rem] max-w-lg px-2 text-sm font-medium text-foreground/55">
+              <p className="mb-2 min-h-[4rem] max-w-lg px-2 text-sm font-medium text-foreground/55">
                 {voiceError ||
                   voiceDisplay ||
-                  (isRecording ? 'Speak now' : voiceSupported ? 'Voice your messy thoughts' : VOICE_UNSUPPORTED)}
+                  (isRecording ? 'Speak clearly — you can pause; we keep listening until you tap stop.' : speechReady ? 'Tap the mic, then speak. Tap again when you are done.' : VOICE_UNSUPPORTED)}
+              </p>
+              <p className="max-w-md text-[11px] text-foreground/40">
+                Using browser language: <span className="font-mono">{getBrowserSpeechLang()}</span> — change system/browser language for other speech recognition languages.
               </p>
             </div>
           )}
@@ -338,7 +424,7 @@ export function InputZone({
         </div>
       </div>
 
-      {(text.trim() || interimText.trim() || url.trim() || images.length > 0) && (
+      {canSubmitNow && (
         <button
           type="button"
           onClick={() => handleSubmit()}
