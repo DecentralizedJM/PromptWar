@@ -93,14 +93,13 @@ npm install
 ```
 
 3. **Configure the Environment:**
-Copy the placeholder `.env.example` file to create your own localized `.env`:
+Copy the placeholder `.env.example` file to create your own localized `.env.local`:
 ```bash
 cp .env.example .env.local
 ```
 Inside `.env.local`, set your Gemini API Data Key:
 ```text
 GEMINI_API_KEY=your_gemini_api_key_here
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 *(You can obtain a free key at [Google AI Studio](https://aistudio.google.com/apikey))*
 
@@ -125,7 +124,7 @@ npm run deploy
 
 ### Vercel Dashboard Method:
 1. Connect your GitHub repository to Vercel.
-2. Under "Environment Variables", assign `GEMINI_API_KEY` and `NEXT_PUBLIC_GEMINI_API_KEY` to your generated Google AI Studio API key.
+2. Under "Environment Variables", assign `GEMINI_API_KEY` to your generated Google AI Studio API key.
 3. Click **Deploy**.
 
 **Custom Domain Instructions:**
