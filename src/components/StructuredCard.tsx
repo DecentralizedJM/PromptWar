@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { StructuredCard } from '@/lib/types';
-import { ShieldCheck, HeartPulse, Landmark, Package, FileText, Search, Info } from 'lucide-react';
+import {
+  ShieldCheck,
+  HeartPulse,
+  Landmark,
+  Package,
+  FileText,
+  Search,
+  Info,
+  type LucideIcon,
+} from 'lucide-react';
 import { ActionEngine } from './ActionEngine';
 import { ShareButton } from './ShareButton';
 import { cn } from '@/lib/utils';
@@ -10,7 +19,7 @@ import { cn } from '@/lib/utils';
 export function StructuredCardView({ card, allCards, index = 0 }: { card: StructuredCard; allCards?: StructuredCard[]; index?: number }) {
   const [showVerify, setShowVerify] = useState(false);
 
-  const domainMap: Record<string, { class: string, text: string, icon: React.ElementType }> = {
+  const domainMap: Record<string, { class: string; text: string; icon: LucideIcon }> = {
     'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
     'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
     'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
@@ -38,7 +47,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
       <div className="p-6 pb-0">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className={cn("p-2.5 rounded-xl bg-white/5 border-glass", domainInfo.text)}>
+            <div className={cn("p-2.5 rounded-xl bg-foreground/5 border-glass", domainInfo.text)}>
               <Icon size={24} />
             </div>
             <div>
@@ -52,7 +61,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-2 min-w-[100px]">
                <span className="text-[10px] font-mono text-foreground/40 font-bold uppercase tracking-wider">Confidence</span>
-               <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+               <div className="flex-1 h-1.5 rounded-full bg-foreground/5 overflow-hidden">
                  <div 
                    className={cn("h-full rounded-full transition-all duration-1000", confidenceColor(card.confidenceScore))}
                    style={{ width: `${card.confidenceScore}%` }}
@@ -78,7 +87,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
             <span className="text-[11px] font-bold text-foreground/30 uppercase tracking-widest min-w-[120px] shrink-0 group-hover:text-foreground/50 transition-colors">
               {item.label}
             </span>
-            <div className="flex-1 border-b border-dashed border-white/5 mb-[0.3rem]" />
+            <div className="flex-1 border-b border-dashed border-border mb-[0.3rem]" />
             <span className={cn(
               "text-sm font-mono font-bold tracking-tight",
               item.status === 'warning' ? 'text-finance' : 
@@ -99,7 +108,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
             AI Reasoning & Verification
           </div>
           <p className="text-xs leading-relaxed text-foreground/60 font-medium italic">
-            &quot;{card.logicReasoning}&quot;
+            &ldquo;{card.logicReasoning}&rdquo;
           </p>
         </div>
       )}
@@ -112,7 +121,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
           onClick={() => setShowVerify(!showVerify)}
           className={cn(
             "px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-2 border-glass",
-            showVerify ? "bg-primary text-primary-foreground" : "bg-white/5 text-foreground/40 hover:text-foreground hover:bg-white/10"
+            showVerify ? "bg-primary text-primary-foreground" : "bg-foreground/5 text-foreground/40 hover:text-foreground hover:bg-foreground/10"
           )}
         >
           {showVerify ? <Info size={14} /> : <Search size={14} />}

@@ -68,7 +68,7 @@ export function QRCode({ value, size = 160 }: QRCodeProps) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
 
-    ctx.fillStyle = '#1a2744';
+    ctx.fillStyle = '#0d2818';
     matrix.forEach((row, r) => {
       row.forEach((cell, c) => {
         if (cell) {

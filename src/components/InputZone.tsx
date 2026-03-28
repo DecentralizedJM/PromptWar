@@ -101,7 +101,7 @@ export function InputZone({
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
       {/* Mode Selector Pills */}
-      <nav className="flex flex-wrap gap-2 mb-8 justify-center p-1 bg-card/30 backdrop-blur-md rounded-full border border-white/5 shadow-2xl overflow-hidden" aria-label="Input methods">
+      <nav className="flex flex-wrap gap-2 mb-8 justify-center p-1 bg-card/30 backdrop-blur-md rounded-full border border-border shadow-2xl overflow-hidden" aria-label="Input methods">
         {pills.map(pill => (
           <button
             key={pill.mode}
@@ -113,7 +113,7 @@ export function InputZone({
                "flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95",
                activeMode === pill.mode 
                 ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                : "text-foreground/40 hover:text-foreground hover:bg-white/5"
+                : "text-foreground/40 hover:text-foreground hover:bg-foreground/5"
             )}
           >
             {pill.icon}
@@ -240,7 +240,7 @@ export function InputZone({
           disabled={isProcessing}
           className={cn(
             "mt-8 px-10 py-4 rounded-full bg-primary text-primary-foreground font-black text-base transition-all duration-300 flex items-center gap-2 active:scale-95",
-            isProcessing ? "opacity-50 cursor-not-allowed" : "animate-glow-pulse hover:shadow-[0_0_30px_rgba(78,205,196,0.5)]"
+            isProcessing ? "opacity-50 cursor-not-allowed" : "animate-glow-pulse hover:shadow-glow-seafoam"
           )}
         >
           {isProcessing ? <Loader2 className="animate-spin" /> : <Sparkles />}

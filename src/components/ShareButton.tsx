@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Share2, Copy, Check, X, Loader2, QrCode } from 'lucide-react';
 import { StructuredCard } from '@/lib/types';
-import { QRCode } from '@/components/QRCode';
+import { QRCode } from './QRCode';
 
 interface ShareButtonProps {
   cards: StructuredCard[];
@@ -53,7 +53,7 @@ export function ShareButton({ cards, title }: ShareButtonProps) {
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-6 border-b border-white/5 flex justify-between items-center relative overflow-hidden">
+          <div className="p-6 border-b border-border flex justify-between items-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
             <div className="relative">
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Bridge Share</p>
@@ -61,7 +61,7 @@ export function ShareButton({ cards, title }: ShareButtonProps) {
             </div>
             <button 
               onClick={() => setState('idle')} 
-              className="p-2 rounded-xl hover:bg-white/5 text-foreground/20 hover:text-foreground transition-all relative z-10"
+              className="p-2 rounded-xl hover:bg-foreground/5 text-foreground/20 hover:text-foreground transition-all relative z-10"
               aria-label="Close"
             >
               <X size={20} />
@@ -102,8 +102,10 @@ export function ShareButton({ cards, title }: ShareButtonProps) {
             </div>
           </div>
           
-          <div className="p-4 bg-white/5 border-t border-white/5 text-center">
-             <p className="text-[10px] font-medium text-foreground/30 italic">&quot;Secure, ephemeral, and structured.&quot;</p>
+          <div className="p-4 bg-foreground/5 border-t border-border text-center">
+             <p className="text-[10px] font-medium text-foreground/30 italic">
+               &ldquo;Secure, ephemeral, and structured.&rdquo;
+             </p>
           </div>
         </div>
       </div>
@@ -114,7 +116,7 @@ export function ShareButton({ cards, title }: ShareButtonProps) {
     <button
       onClick={handleShare}
       disabled={state === 'loading'}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border-glass text-foreground/40 hover:text-foreground hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/5 border-glass text-foreground/40 hover:text-foreground hover:bg-foreground/10 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
     >
       {state === 'loading' ? <Loader2 size={12} className="animate-spin" /> : <Share2 size={12} />}
       Share

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { HistoryItem } from '@/lib/types';
-import { Clock, Search, Bot, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Clock, Search, Bot, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function HistorySidebar({
@@ -40,13 +40,13 @@ export function HistorySidebar({
   return (
     <aside 
       className={cn(
-        "h-full glass border-r border-white/5 flex flex-col transition-all duration-500 z-30 relative overflow-hidden",
+        "h-full glass border-r border-border flex flex-col transition-all duration-500 z-30 relative overflow-hidden",
         isCollapsed ? "w-20" : "w-80"
       )}
       aria-label="Bridge history"
     >
       {/* Header */}
-      <div className={cn("p-6 flex items-center justify-between border-b border-white/5", isCollapsed && "px-4")}>
+      <div className={cn("p-6 flex items-center justify-between border-b border-border", isCollapsed && "px-4")}>
         {!isCollapsed && (
           <div className="flex items-center gap-3 animate-slide-up">
             <div className="w-10 h-10 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam transform -rotate-3">
@@ -60,7 +60,7 @@ export function HistorySidebar({
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "p-2 rounded-xl hover:bg-white/5 text-foreground/40 hover:text-foreground transition-all active:scale-90",
+            "p-2 rounded-xl hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-all active:scale-90",
             isCollapsed && "mx-auto"
           )}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -89,7 +89,7 @@ export function HistorySidebar({
                 onClick={() => setFilter('all')}
                 className={cn(
                   "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
-                  filter === 'all' ? "bg-primary text-primary-foreground" : "bg-white/5 text-foreground/40 hover:bg-white/10"
+                  filter === 'all' ? "bg-primary text-primary-foreground" : "bg-foreground/5 text-foreground/40 hover:bg-foreground/10"
                 )}
               >
                 All
@@ -100,7 +100,7 @@ export function HistorySidebar({
                   onClick={() => setFilter(d)}
                   className={cn(
                     "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
-                    filter === d ? "bg-primary text-primary-foreground" : "bg-white/5 text-foreground/40 hover:bg-white/10"
+                    filter === d ? "bg-primary text-primary-foreground" : "bg-foreground/5 text-foreground/40 hover:bg-foreground/10"
                   )}
                 >
                   {d.split('_')[0]}
@@ -113,7 +113,7 @@ export function HistorySidebar({
           <div className="flex-1 overflow-y-auto px-3 pb-8 space-y-2 no-scrollbar animate-slide-up" style={{ animationDelay: '200ms' }}>
             {filteredHistory.length === 0 ? (
               <div className="text-center p-12 flex flex-col items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-foreground/20">
+                <div className="w-12 h-12 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/20">
                    <Clock size={24} />
                 </div>
                 <p className="text-[11px] font-bold text-foreground/30 uppercase tracking-[0.2em]">
@@ -121,11 +121,11 @@ export function HistorySidebar({
                 </p>
               </div>
             ) : (
-              filteredHistory.map((item, idx) => (
+              filteredHistory.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => onSelect(item)}
-                  className="w-full text-left p-4 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all group relative overflow-hidden"
+                  className="w-full text-left p-4 rounded-2xl hover:bg-foreground/5 border border-transparent hover:border-border transition-all group relative overflow-hidden"
                 >
                   {/* Active Indicator Line */}
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-8 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -172,7 +172,7 @@ export function HistorySidebar({
              <button
                key={item.id}
                onClick={() => onSelect(item)}
-               className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-foreground/20 hover:text-primary hover:bg-primary/10 transition-all active:scale-90 relative group"
+               className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-foreground/20 hover:text-primary hover:bg-primary/10 transition-all active:scale-90 relative group"
                title={item.inputSummary}
              >
                 <div className={cn("w-2 h-2 rounded-full", getDomainColor(item.results[0]?.domain))} />

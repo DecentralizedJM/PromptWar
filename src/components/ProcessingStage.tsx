@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -79,9 +78,9 @@ export function ProcessingStage() {
             />
             <defs>
               <linearGradient id="bridgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(175, 56%, 55%)" />
-                <stop offset="50%" stopColor="hsl(37, 78%, 56%)" />
-                <stop offset="100%" stopColor="hsl(221, 78%, 64%)" />
+                <stop offset="0%" stopColor="hsl(152, 60%, 45%)" />
+                <stop offset="50%" stopColor="hsl(45, 90%, 55%)" />
+                <stop offset="100%" stopColor="hsl(80, 70%, 50%)" />
               </linearGradient>
             </defs>
           </svg>
@@ -125,7 +124,7 @@ export function ProcessingStage() {
       </div>
       
       <p className="text-foreground/30 text-xs md:text-sm mt-4 font-bold uppercase tracking-[0.2em]">
-        Gemini 3 Neural Engine Active
+        Gemini Processing Engine Active
       </p>
 
       {/* Screen Reader Announcement */}

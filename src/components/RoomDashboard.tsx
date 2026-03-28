@@ -4,11 +4,24 @@ import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { RoomCard, DomainType, RoomMember, FamilyRoom } from '@/lib/types';
-import { HeartPulse, Landmark, Package, FileText, Copy, Check, LogOut, Bot, ShieldCheck, UserCircle2 } from 'lucide-react';
+import {
+  HeartPulse,
+  Landmark,
+  Package,
+  FileText,
+  Copy,
+  Check,
+  LogOut,
+  Bot,
+  ShieldCheck,
+  UserCircle2,
+  type LucideIcon,
+} from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
 import { MemberIndicator } from './MemberIndicator';
+import { FIRESTORE_COLLECTIONS, FIRESTORE_SUBCOLLECTIONS } from '@/lib/google-services';
 import { cn } from '@/lib/utils';
 
 interface RoomDashboardProps {
@@ -19,14 +32,21 @@ interface RoomDashboardProps {
   onLeave: () => void;
 }
 
-const DOMAIN_MAP: Record<string, { class: string, text: string, icon: React.ElementType }> = {
+const DOMAIN_MAP: Record<string, { class: string; text: string; icon: LucideIcon }> = {
   'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
   'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
   'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
   'GOVERNMENT_LEGAL': { class: 'border-l-legal', text: 'text-legal', icon: FileText },
 };
 
-export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onLeave }: RoomDashboardProps) {
+export function RoomDashboard({
+  roomCode,
+  memberId: _memberId,
+  memberEmoji,
+  memberName,
+  onLeave,
+}: RoomDashboardProps) {
+  void _memberId; // reserved for future per-member features; parent always passes it
   const [cards, setCards] = useState<RoomCard[]>([]);
   const [members, setMembers] = useState<RoomMember[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,14 +54,17 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
 
   // Real-time listener for cards
   useEffect(() => {
-    const unsubCards = onSnapshot(collection(db, 'rooms', roomCode, 'cards'), snap => {
-      const fetched: RoomCard[] = [];
-      snap.forEach(d => fetched.push(d.data() as RoomCard));
-      setCards(fetched.sort((a, b) => b.addedAt - a.addedAt));
-    });
+    const unsubCards = onSnapshot(
+      collection(db, FIRESTORE_COLLECTIONS.rooms, roomCode, FIRESTORE_SUBCOLLECTIONS.roomCards),
+      (snap) => {
+        const fetched: RoomCard[] = [];
+        snap.forEach((d) => fetched.push(d.data() as RoomCard));
+        setCards(fetched.sort((a, b) => b.addedAt - a.addedAt));
+      }
+    );
 
     // Real-time listener for members
-    const unsubRoom = onSnapshot(doc(db, 'rooms', roomCode), snap => {
+    const unsubRoom = onSnapshot(doc(db, FIRESTORE_COLLECTIONS.rooms, roomCode), snap => {
       if (snap.exists()) {
         const roomData = snap.data() as FamilyRoom;
         setMembers(roomData.members || []);
@@ -68,7 +91,10 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
         contributorEmoji: memberEmoji,
         addedAt: Date.now(),
       };
-      await setDoc(doc(db, 'rooms', roomCode, 'cards', roomCard.id), roomCard);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.rooms, roomCode, FIRESTORE_SUBCOLLECTIONS.roomCards, roomCard.id),
+        roomCard
+      );
     }
     setIsProcessing(false);
   };
@@ -92,7 +118,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
       <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-primary/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
       {/* Room Header */}
-      <header className="glass border-b border-white/5 px-6 py-4 flex items-center justify-between shrink-0 z-30 relative">
+      <header className="glass border-b border-border px-6 py-4 flex items-center justify-between shrink-0 z-30 relative">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
              <div className="w-9 h-9 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-glow-seafoam -rotate-3">
@@ -104,7 +130,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
                   <span className="text-xl font-mono font-black tracking-widest leading-none">{roomCode}</span>
                   <button 
                     onClick={copyCode} 
-                    className="p-1 px-2 rounded-lg bg-white/5 border-glass text-foreground/20 hover:text-foreground transition-all flex items-center gap-1.5"
+                    className="p-1 px-2 rounded-lg bg-foreground/5 border-glass text-foreground/20 hover:text-foreground transition-all flex items-center gap-1.5"
                   >
                     {codeCopied ? <Check size={12} className="text-health" /> : <Copy size={12} />}
                     <span className="text-[10px] font-black uppercase tracking-widest">{codeCopied ? 'Copied' : 'Copy'}</span>
@@ -113,7 +139,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
              </div>
           </div>
           
-          <div className="h-10 w-px bg-white/5 hidden sm:block" />
+          <div className="h-10 w-px bg-foreground/5 hidden sm:block" />
           
           <div className="hidden sm:block">
             <MemberIndicator members={members} />
@@ -121,7 +147,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border-glass">
+          <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-foreground/5 border-glass">
             <span className="text-xl leading-none">{memberEmoji}</span>
             <div className="flex flex-col">
               <span className="text-[9px] font-black text-foreground/30 uppercase tracking-widest leading-none">Perspective</span>
@@ -141,7 +167,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-20">
         {/* Left Panel: Contribution (Sidebar-style) */}
-        <div className="md:w-[400px] shrink-0 p-8 glass border-r border-white/5 overflow-y-auto no-scrollbar">
+        <div className="md:w-[400px] shrink-0 p-8 glass border-r border-border overflow-y-auto no-scrollbar">
           <div className="flex items-center gap-3 mb-8">
              <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center text-accent">
                 <UserCircle2 size={18} />
@@ -159,9 +185,10 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
             )}
           </div>
           
-          <div className="mt-12 p-6 rounded-2xl bg-white/5 border-glass border-dashed">
+          <div className="mt-12 p-6 rounded-2xl bg-foreground/5 border-glass border-dashed">
              <p className="text-[11px] leading-relaxed text-foreground/40 font-medium italic">
-                &quot;Contributions here are instantly synthesized and reflected on the shared family dashboard in real-time.&quot;
+                &ldquo;Contributions here are instantly synthesized and reflected on the shared family dashboard in
+                real-time.&rdquo;
              </p>
           </div>
         </div>
@@ -174,7 +201,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
                 <h2 className="text-sm font-black text-foreground/30 uppercase tracking-[0.3em] mb-1">Collaborative Matrix</h2>
                 <p className="text-3xl font-black tracking-tight">{cards.length} Active Insight{cards.length !== 1 ? 's' : ''}</p>
               </div>
-              <div className="p-3 px-5 rounded-2xl bg-white/5 border-glass flex items-center gap-3">
+              <div className="p-3 px-5 rounded-2xl bg-foreground/5 border-glass flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-health animate-pulse" />
                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Live Sync Active</span>
               </div>
@@ -182,7 +209,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
 
             {cards.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center animate-in fade-in zoom-in-95 duration-700">
-                <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 flex items-center justify-center text-5xl mb-6 shadow-2xl">🏠</div>
+                <div className="w-20 h-20 rounded-[2.5rem] bg-foreground/5 flex items-center justify-center text-5xl mb-6 shadow-2xl">🏠</div>
                 <h3 className="text-xl font-heading font-black tracking-tight mb-2">Populating the Space...</h3>
                 <p className="text-foreground/40 text-sm font-medium max-w-xs">Waiting for contributions. Share your code <span className="text-accent font-black tracking-widest">{roomCode}</span> to start bridging together.</p>
               </div>
@@ -195,16 +222,16 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
                   return (
                     <div key={domain} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex items-center gap-4 mb-6">
-                        <div className={cn("p-2 rounded-xl bg-white/5 border-glass", info.text)}>
+                        <div className={cn("p-2 rounded-xl bg-foreground/5 border-glass", info.text)}>
                           <Icon size={18} />
                         </div>
                         <h3 className="text-sm font-black uppercase tracking-[0.2em]">{domain.replace('_', ' ')}</h3>
-                        <div className="h-px flex-1 bg-white/5" />
+                        <div className="h-px flex-1 bg-foreground/5" />
                         <span className="text-[10px] font-mono font-black text-foreground/20">{domainCards.length} UNITS</span>
                       </div>
 
                       <div className="grid grid-cols-1 gap-6">
-                        {domainCards.map((card, idx) => (
+                        {domainCards.map((card) => (
                           <div 
                             key={card.id} 
                             className={cn(
@@ -229,7 +256,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
                                   "px-3 py-1.5 rounded-xl border-glass flex items-center gap-3",
                                   item.status === 'warning' ? 'bg-accent/10 text-accent' :
                                   item.status === 'success' ? 'bg-health/10 text-health' :
-                                  'bg-white/5 text-foreground/70'
+                                  'bg-foreground/5 text-foreground/70'
                                 )}>
                                   <span className="text-[9px] font-black uppercase tracking-widest opacity-60 shrink-0">{item.label}</span>
                                   <span className="text-[11px] font-bold font-mono tracking-tight">{item.value}</span>
@@ -238,7 +265,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
                             </div>
                             
                             {/* Metadata footer */}
-                            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
                                <div className="flex items-center gap-2 text-primary/50">
                                   <ShieldCheck size={12} />
                                   <span className="text-[10px] font-black uppercase tracking-widest leading-none">Gemini Verified</span>

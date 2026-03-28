@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { FIRESTORE_COLLECTIONS } from '@/lib/google-services';
 import { FamilyRoom } from '@/lib/types';
 
 const ANIMALS = ['🐻', '🦊', '🐼', '🐨', '🦁', '🐯', '🐸', '🦉', '🦋', '🐬'];
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
       }],
     };
 
-    await setDoc(doc(collection(db, 'rooms'), roomCode), room);
+    await setDoc(doc(collection(db, FIRESTORE_COLLECTIONS.rooms), roomCode), room);
 
     return NextResponse.json({ roomCode, memberId, emoji: ANIMALS[animalIdx], name: room.members[0].name });
   } catch (error: unknown) {
@@ -48,7 +49,7 @@ export async function GET(request: Request) {
 
     if (!code) return NextResponse.json({ error: 'Room code required' }, { status: 400 });
 
-    const roomSnap = await getDoc(doc(db, 'rooms', code));
+    const roomSnap = await getDoc(doc(db, FIRESTORE_COLLECTIONS.rooms, code));
     if (!roomSnap.exists()) return NextResponse.json({ error: 'Room not found' }, { status: 404 });
 
     const memberId = crypto.randomUUID();
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
 
     const room = roomSnap.data() as FamilyRoom;
     const updatedMembers = [...(room.members || []), newMember];
-    await setDoc(doc(db, 'rooms', code), { ...room, members: updatedMembers });
+    await setDoc(doc(db, FIRESTORE_COLLECTIONS.rooms, code), { ...room, members: updatedMembers });
 
     return NextResponse.json({ roomCode: code, memberId, emoji: newMember.emoji, name: newMember.name });
   } catch (error: unknown) {

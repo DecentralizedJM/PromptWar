@@ -1,7 +1,6 @@
 'use client';
 
 import { RoomMember } from '@/lib/types';
-import { Users } from 'lucide-react';
 
 interface MemberIndicatorProps {
   members: RoomMember[];
@@ -15,20 +14,20 @@ export function MemberIndicator({ members }: MemberIndicatorProps) {
           <div 
             key={member.id}
             title={member.name}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-navy/20 border-2 border-navy ring-2 ring-white text-base shadow-sm hover:scale-110 transition-transform cursor-default"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 border-2 border-background ring-2 ring-primary/20 text-base shadow-sm hover:scale-110 transition-transform cursor-default"
           >
             {member.emoji}
           </div>
         ))}
         {members.length > 5 && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-navy/40 border-2 border-navy ring-2 ring-white text-[10px] font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 border-2 border-background ring-2 ring-primary/20 text-[10px] font-bold text-foreground">
             +{members.length - 5}
           </div>
         )}
       </div>
       <div className="hidden sm:flex flex-col ml-1">
-        <span className="text-[9px] font-black uppercase tracking-tighter text-white/40 leading-none">Family Sync</span>
-        <span className="text-xs font-bold text-white leading-tight">
+        <span className="text-[9px] font-black uppercase tracking-tighter text-foreground/40 leading-none">Family Sync</span>
+        <span className="text-xs font-bold text-foreground leading-tight">
           {members.length} {members.length === 1 ? 'active' : 'active members'}
         </span>
       </div>

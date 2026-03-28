@@ -2,6 +2,8 @@
 
 @plugin "tailwindcss-animate";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @property --angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -9,42 +11,38 @@
 }
 
 @theme {
-  /* Brand Colors (HSL) */
-  --color-background: hsl(222 45% 11%);
-  --color-foreground: hsl(50 33% 97%);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
 
-  --color-card: hsl(220 38% 18%);
-  --color-card-foreground: hsl(50 33% 97%);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--fg);
 
-  --color-popover: hsl(220 38% 18%);
-  --color-popover-foreground: hsl(50 33% 97%);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--fg);
 
-  --color-primary: hsl(175 56% 55%);
-  --color-primary-foreground: hsl(222 45% 11%);
+  --color-primary: hsl(152 60% 45%);
+  --color-primary-foreground: hsl(0 0% 100%);
 
-  --color-secondary: hsl(220 38% 22%);
-  --color-secondary-foreground: hsl(50 33% 97%);
+  --color-secondary: var(--surface-alt);
+  --color-secondary-foreground: var(--fg);
 
-  --color-muted: hsl(215 25% 20%);
-  --color-muted-foreground: hsl(210 18% 60%);
+  --color-muted: var(--surface-alt);
+  --color-muted-foreground: var(--fg-muted);
 
-  --color-accent: hsl(220 38% 22%);
-  --color-accent-foreground: hsl(50 33% 97%);
+  --color-accent: var(--surface-alt);
+  --color-accent-foreground: var(--fg);
 
-  --color-destructive: hsl(0 72% 70%);
-  --color-destructive-foreground: hsl(50 33% 97%);
+  --color-destructive: hsl(0 72% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
 
-  --color-border: hsla(0 0% 100% / 0.06);
-  --color-input: hsl(220 38% 22%);
-  --color-ring: hsl(175 56% 55%);
+  --color-border: var(--border-clr);
+  --color-input: var(--surface-alt);
+  --color-ring: hsl(152 60% 45%);
 
-  --color-navy: #1a2744;
-  --color-warmWhite: #fafaf8;
-  --color-amber: #e8a838;
-  --color-seafoam: #4ecdc4;
+  --color-gold: hsl(45 90% 55%);
 
   /* Domain Colors */
-  --color-health: hsl(175 56% 55%);
+  --color-health: hsl(152 60% 45%);
   --color-finance: hsl(37 78% 56%);
   --color-logistics: hsl(221 78% 64%);
   --color-legal: hsl(262 97% 71%);
@@ -74,8 +72,8 @@
   }
 
   @keyframes glowPulse {
-    0%, 100% { box-shadow: 0 0 16px hsla(175, 56%, 55%, 0.3); }
-    50% { box-shadow: 0 0 28px hsla(175, 56%, 55%, 0.6); }
+    0%, 100% { box-shadow: 0 0 16px hsla(152, 60%, 45%, 0.3); }
+    50% { box-shadow: 0 0 28px hsla(152, 60%, 45%, 0.6); }
   }
 
   @keyframes floatFragment {
@@ -112,13 +110,36 @@
   }
 }
 
+/* ── Light mode (default) ────────────────────────────── */
 :root {
-  --background: 222 45% 11%;
-  --foreground: 50 33% 97%;
-  
-  --shadow-navy: 0 8px 32px rgba(15, 23, 41, 0.4);
-  --shadow-navy-lg: 0 16px 48px rgba(15, 23, 41, 0.6);
-  --glow-seafoam: 0 0 24px hsla(175, 56%, 55%, 0.4);
+  --bg: hsl(120 15% 97%);
+  --fg: hsl(155 40% 10%);
+  --surface: hsl(120 15% 94%);
+  --surface-alt: hsl(150 12% 90%);
+  --fg-muted: hsl(155 15% 45%);
+  --border-clr: hsla(152 30% 30% / 0.10);
+  --glass-bg: hsla(150, 20%, 96%, 0.85);
+  --glass-bg-subtle: hsla(150, 20%, 96%, 0.5);
+
+  --shadow-navy: 0 8px 32px rgba(10, 40, 30, 0.08);
+  --shadow-navy-lg: 0 16px 48px rgba(10, 40, 30, 0.12);
+  --glow-seafoam: 0 0 24px hsla(152, 60%, 45%, 0.25);
+}
+
+/* ── Dark mode ───────────────────────────────────────── */
+.dark {
+  --bg: hsl(155 40% 6%);
+  --fg: hsl(0 0% 97%);
+  --surface: hsl(155 32% 12%);
+  --surface-alt: hsl(155 28% 16%);
+  --fg-muted: hsl(155 15% 55%);
+  --border-clr: hsla(0 0% 100% / 0.06);
+  --glass-bg: hsla(155, 32%, 12%, 0.75);
+  --glass-bg-subtle: hsla(155, 32%, 12%, 0.4);
+
+  --shadow-navy: 0 8px 32px rgba(5, 20, 15, 0.5);
+  --shadow-navy-lg: 0 16px 48px rgba(5, 20, 15, 0.7);
+  --glow-seafoam: 0 0 24px hsla(152, 60%, 45%, 0.4);
 }
 
 body {
@@ -126,38 +147,44 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Background Radial Glow */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, hsla(220, 38%, 18%, 0.6) 0%, transparent 70%);
   pointer-events: none;
   z-index: -1;
 }
 
+.dark body::before {
+  background: radial-gradient(ellipse at 50% 40%, hsla(155, 32%, 14%, 0.6) 0%, transparent 70%);
+}
+
+:root body::before {
+  background: radial-gradient(ellipse at 50% 40%, hsla(150, 20%, 92%, 0.6) 0%, transparent 70%);
+}
+
 @layer utilities {
   .glass {
-    background: hsla(220, 38%, 18%, 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
 
   .glass-subtle {
-    background: hsla(220, 38%, 18%, 0.4);
+    background: var(--glass-bg-subtle);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
 
   .text-gradient-brand {
-    background: linear-gradient(135deg, hsl(175, 56%, 55%), hsl(37, 78%, 56%));
+    background: linear-gradient(135deg, hsl(152, 60%, 45%), hsl(80, 70%, 50%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .border-glass {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-clr);
   }
 
   .typewriter-dots::after {
@@ -177,12 +204,24 @@ body::before {
     inset: -2px;
     border-radius: 1.5rem;
     padding: 2px;
-    background: conic-gradient(from var(--angle), #1a2744, #4ecdc4, #e8a838, #5b8def, #1a2744);
+    background: conic-gradient(from var(--angle), hsl(155 40% 10%), hsl(152 60% 45%), hsl(45 90% 55%), hsl(80 70% 50%), hsl(155 40% 10%));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     animation: rotate-gradient 6s linear infinite;
     pointer-events: none;
+  }
+
+  .shadow-navy {
+    box-shadow: var(--shadow-navy);
+  }
+
+  .shadow-navy-lg {
+    box-shadow: var(--shadow-navy-lg);
+  }
+
+  .shadow-glow-seafoam {
+    box-shadow: var(--glow-seafoam);
   }
 }
 
@@ -196,17 +235,17 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsla(210, 18%, 60%, 0.3);
+  background: hsla(152, 30%, 40%, 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsla(210, 18%, 60%, 0.5);
+  background: hsla(152, 30%, 40%, 0.5);
 }
 
 /* Accessibility */
 *:focus-visible {
-  outline: 2px solid hsl(175, 56%, 55%);
+  outline: 2px solid hsl(152, 60%, 45%);
   outline-offset: 2px;
 }
 

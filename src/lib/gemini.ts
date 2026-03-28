@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { GoogleGenAI } from '@google/genai';
+import { GEMINI_MODEL_ID } from './google-services';
 import { ProcessingResult } from './types';
 const responseSchema: any = {
   type: "object",
@@ -82,7 +83,7 @@ ${textContent}`;
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: GEMINI_MODEL_ID,
       contents: [{ parts }],
       config: {
         responseMimeType: "application/json",

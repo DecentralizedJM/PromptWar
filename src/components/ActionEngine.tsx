@@ -110,7 +110,7 @@ export function ActionEngine({ card }: { card: StructuredCard }) {
             "px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-200 flex items-center gap-2 border-glass active:scale-95",
             activeAction === idx 
               ? "bg-primary text-primary-foreground" 
-              : "bg-white/5 text-foreground/40 hover:text-foreground hover:bg-white/10"
+              : "bg-foreground/5 text-foreground/40 hover:text-foreground hover:bg-foreground/10"
           )}
         >
           {activeAction === idx ? <Loader2 size={14} className="animate-spin" /> : getIcon(action.type)}
@@ -133,7 +133,7 @@ export function ActionEngine({ card }: { card: StructuredCard }) {
               <h3 className="text-sm font-black uppercase tracking-[0.2em]">{modalContent.title}</h3>
               <button 
                 onClick={() => setModalContent(null)} 
-                className="p-1.5 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground transition-all"
+                className="p-1.5 rounded-lg hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-all"
                 aria-label="Close"
               >
                 <X size={18} />

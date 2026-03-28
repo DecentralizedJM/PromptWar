@@ -54,7 +54,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border-glass text-foreground/40 hover:text-foreground hover:bg-white/10 font-black text-[11px] uppercase tracking-widest transition-all active:scale-95"
+        className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/5 border-glass text-foreground/40 hover:text-foreground hover:bg-foreground/10 font-black text-[11px] uppercase tracking-widest transition-all active:scale-95"
       >
         <Users size={14} />
         Family Mode
@@ -72,7 +72,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex justify-between items-center relative overflow-hidden">
+            <div className="p-6 border-b border-border flex justify-between items-center relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
               <div className="relative">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Collaborative</p>
@@ -83,7 +83,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
               {!loading && (
                 <button 
                   onClick={() => { setOpen(false); reset(); }} 
-                  className="p-2 rounded-xl hover:bg-white/5 text-foreground/20 hover:text-foreground transition-all relative z-10"
+                  className="p-2 rounded-xl hover:bg-foreground/5 text-foreground/20 hover:text-foreground transition-all relative z-10"
                   aria-label="Close"
                 >
                   <X size={20} />
@@ -161,7 +161,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
                   <div className="flex gap-3 pt-2">
                     <button 
                       onClick={() => { setMode('menu'); setError(''); }} 
-                      className="flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-foreground/30 hover:text-foreground hover:bg-white/5 transition-all"
+                      className="flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-foreground/30 hover:text-foreground hover:bg-foreground/5 transition-all"
                     >
                       Back
                     </button>
@@ -170,7 +170,7 @@ export function FamilyModeButton({ onRoomJoined }: FamilyModeButtonProps) {
                       disabled={loading}
                       className={cn(
                         "flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary-foreground transition-all flex items-center justify-center gap-2 active:scale-95 shadow-glow-seafoam",
-                        mode === 'create' ? "bg-primary" : "bg-accent shadow-glow-amber"
+                        mode === 'create' ? "bg-primary" : "bg-primary shadow-glow-seafoam"
                       )}
                     >
                       {loading ? <Loader2 size={14} className="animate-spin" /> : (mode === 'create' ? 'Create' : 'Join')}
