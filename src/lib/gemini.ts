@@ -13,6 +13,7 @@ const responseSchema: any = {
           domain: { type: "string", enum: ['HEALTH', 'FINANCE', 'LOGISTICS', 'GOVERNMENT_LEGAL', 'GENERAL'] },
           title: { type: "string" },
           summary: { type: "string" },
+          logicReasoning: { type: "string", description: "A concise explanation of the logical context (e.g. why a specific status or categorization was chosen based on the input context)." },
           confidenceScore: { type: "number", description: "A score from 0 to 100" },
           items: {
             type: "array",
@@ -39,7 +40,7 @@ const responseSchema: any = {
             }
           }
         },
-        required: ["id", "domain", "title", "summary", "confidenceScore", "items", "actions"]
+        required: ["id", "domain", "title", "summary", "logicReasoning", "confidenceScore", "items", "actions"]
       }
     }
   },

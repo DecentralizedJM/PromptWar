@@ -40,6 +40,17 @@ export function StructuredCardView({ card }: { card: StructuredCard }) {
           </div>
         </div>
         <p className="text-sm text-navy/70 leading-relaxed mt-3">{card.summary}</p>
+        
+        {/* Logic Reasoning Badge */}
+        <div className="mt-4 p-3 bg-seafoam/5 border border-seafoam/10 rounded-xl flex items-start gap-3 animate-pulse-glow">
+          <div className="text-seafoam mt-0.5 mt-[2px] shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          </div>
+          <p className="text-[11px] leading-relaxed font-semibold italic text-seafoam/80">
+            <span className="uppercase text-[9px] not-italic font-black tracking-widest block mb-0.5 opacity-60">AI Insight</span>
+            {card.logicReasoning}
+          </p>
+        </div>
       </div>
 
       {/* Items List */}

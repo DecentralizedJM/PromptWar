@@ -10,6 +10,16 @@ The modern world runs on systems that require expertise to navigate, yet present
 
 ---
 
+## 🏆 Key Competition Deliverables
+
+- **Smart Dynamic Assistant:** Powered by **Gemini 3 Flash Preview**, the assistant provides multimodal support for text, images, and voice, with a confidence-weighted output.
+- **Logical Decision Making:** Every structured output includes a **Logic Reasoning** explanation, demonstrating the model's ability to contextualize and flag risks (e.g., medical contraindications or urgent financial deadlines).
+- **Effective Google Services Integration:** Leverages the latest `@google/genai` SDK and is pre-configured for **Google Cloud Run** using a standalone multi-stage Docker architecture.
+- **Real-World Usability:** Focuses on the "LifeBridge" concept—reducing the friction of navigating dense, bureaucratic, or technical information for everyday users.
+- **Clean & Maintainable:** Built with **TypeScript**, **Next.js 15 Server Actions**, and **React 19**, with a full **Vitest** testing suite for CI/CD readiness.
+
+---
+
 ## 🏗 Architecture & Data Flow
 
 LifeBridge employs a strictly structured Server Action setup. The Google Gemini API key is never exposed to the client-side JavaScript bundle, ensuring secure and private parsing of sensitive documents.
@@ -84,7 +94,7 @@ npm run test
 1. **Clone the repository:**
 ```bash
 git clone https://github.com/DecentralizedJM/PromptWar.git
-cd PromptWar/lifebridge
+cd PromptWar
 ```
 
 2. **Install all dependencies:**

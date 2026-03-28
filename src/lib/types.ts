@@ -17,6 +17,7 @@ export interface StructuredCard {
   domain: DomainType;
   title: string;
   summary: string;
+  logicReasoning: string; // Explains the internal AI logic behind this specific categorization/status
   items: CardItem[];
   confidenceScore: number; // 0 to 100
   actions: Action[];

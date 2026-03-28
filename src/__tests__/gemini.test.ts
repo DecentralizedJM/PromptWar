@@ -14,6 +14,7 @@ vi.mock('@google/genai', () => {
                 domain: "HEALTH",
                 title: "Test Prescription",
                 summary: "Take 2 pills",
+                logicReasoning: "Flagging as healthy because the dosage is standard.",
                 confidenceScore: 95,
                 items: [{ label: "Dosage", value: "2 pills", status: "normal" }],
                 actions: [{ type: "ADD_CALENDAR", label: "Remind me", payload: { title: "Pills" } }]
