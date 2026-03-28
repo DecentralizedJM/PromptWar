@@ -2,9 +2,41 @@
 
 > **A universal bridge between messy human intent and structured life-serving actions.**
 
-LifeBridge is a Next.js web application powered by **Google Gemini 3** that solves a specific, high-friction problem: real-world information is chaotic—prescription bottles, insurance forms, utility bills, legal notices—and navigating the systems behind them requires expertise most people don't have. LifeBridge eliminates that friction. Users photograph, drag, or dictate raw data and receive structured, actionable next steps within seconds.
+LifeBridge is a Next.js web application powered by **Google Gemini** that turns real-world clutter into clear next steps. The sections below explain *why* that matters—not only *how* it is built.
 
 **Live Demo:** [https://promptwar-214175642765.europe-west1.run.app](https://promptwar-214175642765.europe-west1.run.app)
+
+---
+
+## Use case & impact
+
+### The friction most software ignores
+
+Day to day, people are handed **information they did not choose in a shape they cannot use**: pill bottles next to a discharge summary, a utility shutoff notice beside a pay stub, a school form mixed with work email, a letter from an agency written in dense language. Each item implies a **system**—a clinic portal, a billing desk, a registrar, a benefits office—that expects you to already know the rules, the timeline, and the vocabulary.
+
+Closing the gap between *“I have this pile”* and *“I know what to do before the deadline”* usually costs **time, literacy, money, or access to a professional**. LifeBridge is aimed at everyone for whom that cost is too high.
+
+### What LifeBridge does
+
+It is a **single front door** for messy input. You bring **text, voice, or images**—no need to categorize them first. **Gemini** reads the content, sorts it into life domains (health, finance, logistics, legal, general), surfaces **warnings and confidence**, and explains its reasoning. The app then **closes the loop** with **concrete actions**: draft an email, add a calendar block, copy structured details, share a read-only **Bridge** link, or collaborate in **Family Mode** on a live Firestore dashboard.
+
+It is not a filing cabinet. It is a **path from chaos to the next tap**.
+
+### Who it is for
+
+- **Older adults and caregivers** juggling medications, appointments, and paperwork without a full-time care coordinator.  
+- **Anyone navigating bureaucracy** in a non-native language or unfamiliar format.  
+- **Households under pressure**—bills, notices, and school requirements arriving faster than they can be decoded.  
+- **People who cannot lean on paid help** for every letter, form, or statement.  
+- **Families coordinating together** when one person has the photo, another has the account login, and nobody has a spare hour to reconcile them.
+
+### The bridge, literally
+
+On one side: **human reality**—photos, rambling voice notes, screenshots, pasted text.  
+In the middle: **structured reasoning** with Gemini (schema-bound outputs and explicit logic).  
+On the other side: **outputs you can act on**—cards, reminders, drafts, and shareable summaries aligned with how real institutions expect information to look.
+
+> **One-line pitch:** *LifeBridge can take a photo of prescription labels and visit notes and return a structured medication-oriented summary with risk flags and suggested follow-ups—so the next step is obvious, not another hour of guesswork.*
 
 ---
 
@@ -135,7 +167,7 @@ graph LR
 - **Semantic HTML** — `<button>`, `<main>`, `<nav>`, `<header>` used throughout; no `<div onClick>`.
 - **ARIA live regions** — screen readers are notified when processing begins and results appear.
 - **Keyboard navigation** — all interactive elements are focusable and operable via Tab/Enter.
-- **Color contrast** — Navy (#1a2744) on Warm White (#fafaf8) exceeds WCAG AA 4.5:1 ratio.
+- **Color contrast** — Premium green light/dark themes use foreground-on-background pairings intended to meet WCAG AA for body text.
 - **Status indicators** — warning/success states use both color AND text labels (never color alone).
 
 ### Google Services Integration

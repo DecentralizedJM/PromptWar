@@ -15,7 +15,14 @@ const merriweather = Merriweather({
 
 export const metadata: Metadata = {
   title: 'LifeBridge',
-  description: 'A universal bridge between messy human intent and structured life-serving actions.',
+  description:
+    'Turn photos, voice, and notes into structured health, finance, and life actions—powered by Google Gemini. For caregivers, busy households, and anyone bridging messy reality to clear next steps.',
+  openGraph: {
+    title: 'LifeBridge',
+    description:
+      'Universal bridge from messy human input to structured, actionable output. Multimodal AI with Google Gemini; Family Mode and sharing with Google Firestore.',
+    type: 'website',
+  },
 };
 
 const themeInitScript = `(function(){try{var t=localStorage.getItem('lifebridge-theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){}})()`;

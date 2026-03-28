@@ -138,9 +138,28 @@ export default function Home() {
                 </h1>
               </WavyHover>
 
-              <p className="max-w-2xl text-center text-foreground/40 text-lg md:text-xl font-medium mb-6 leading-relaxed tracking-tight text-balance">
+              <p className="max-w-2xl text-center text-foreground/40 text-lg md:text-xl font-medium mb-5 leading-relaxed tracking-tight text-balance">
                 The universal interface for messy human intent. Drop notes, voice memos, or photos and turn chaos into structure.
               </p>
+
+              <p className="max-w-xl text-center text-foreground/35 text-sm md:text-[15px] font-medium mb-2 leading-relaxed text-balance px-2">
+                Built for real life: bills beside school forms, bottles beside lab printouts, notices you cannot afford to misread.
+                LifeBridge reads what you have and hands back categories, warnings, and actions—not another empty dashboard.
+              </p>
+              <div
+                className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-10 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/25"
+                aria-label="Example audiences"
+              >
+                <span>Caregivers</span>
+                <span className="hidden sm:inline text-foreground/15" aria-hidden>
+                  ·
+                </span>
+                <span>Newcomers to bureaucracy</span>
+                <span className="hidden sm:inline text-foreground/15" aria-hidden>
+                  ·
+                </span>
+                <span>Anyone past capacity</span>
+              </div>
 
               {/* Powered by Gemini badge */}
               <div className="flex items-center gap-2 mb-12 opacity-60 hover:opacity-100 transition-opacity">
