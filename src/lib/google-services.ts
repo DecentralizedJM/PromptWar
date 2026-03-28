@@ -5,7 +5,8 @@
  * - **Firestore** (`firebase/firestore`): real-time rooms and ephemeral Bridge Share documents (Firebase / Google Cloud project).
  * - **Google Cloud Run**: production hosting; optional env `K_SERVICE`, `K_REVISION`, `GOOGLE_CLOUD_REGION` are exposed on `/api/health` for observability.
  */
-export const GEMINI_MODEL_ID = 'gemini-3-flash-preview' as const;
+/** Matches Generative Language API model id (e.g. `gemini-flash-latest` alias). */
+export const GEMINI_MODEL_ID = 'gemini-flash-latest' as const;
 
 export const FIRESTORE_COLLECTIONS = {
   shares: 'shares',

@@ -17,7 +17,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
-import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
+import { LifeBridgeLogo } from '@/components/LifeBridgeLogo';
+import { useI18n } from '@/components/I18nProvider';
 import { InputZone } from './InputZone';
 import { ProcessingStage } from './ProcessingStage';
 import { MemberIndicator } from './MemberIndicator';
@@ -47,6 +48,7 @@ export function RoomDashboard({
   onLeave,
 }: RoomDashboardProps) {
   void _memberId; // reserved for future per-member features; parent always passes it
+  const { locale, t } = useI18n();
   const [cards, setCards] = useState<RoomCard[]>([]);
   const [members, setMembers] = useState<RoomMember[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -79,8 +81,12 @@ export function RoomDashboard({
 
   const processInput = async (text: string, images: { data: string; mimeType: string }[]) => {
     setIsProcessing(true);
-    const result = await submitToGemini(text, images);
-    if (result.error) { alert('Error: ' + result.error); setIsProcessing(false); return; }
+    const result = await submitToGemini(text, images, { uiLocale: locale });
+    if (result.error) {
+      alert(`${t.errorPrefix} ${result.error}`);
+      setIsProcessing(false);
+      return;
+    }
 
     // Write each card to Firestore room
     for (const card of result.cards) {
@@ -112,7 +118,7 @@ export function RoomDashboard({
   }, {});
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground relative overflow-hidden selection:bg-primary/30">
+    <div className="flex h-full min-h-0 flex-col bg-background text-foreground relative overflow-hidden selection:bg-primary/30">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 w-[40vw] h-[40vh] bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-primary/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
@@ -121,7 +127,7 @@ export function RoomDashboard({
       <header className="glass border-b border-border px-6 py-4 flex items-center justify-between shrink-0 z-30 relative">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
-             <BridgeTheGapLogo size="sm" className="-translate-y-px" />
+             <LifeBridgeLogo size="sm" className="-translate-y-px max-w-[9rem]" />
              <div className="flex flex-col">
                 <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60 leading-none mb-1">Family Room</p>
                 <div className="flex items-center gap-2">

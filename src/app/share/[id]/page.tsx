@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
+import { LifeBridgeLogo } from '@/components/LifeBridgeLogo';
 import { cn } from '@/lib/utils';
 
 export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,7 +37,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
       {/* Brand header */}
       <header className="glass border-b border-border px-6 py-6 flex items-center justify-between sticky top-0 z-50">
         <Link href="/" className="flex min-w-0 items-center gap-3 group">
-          <BridgeTheGapLogo size="lg" className="shrink-0 group-hover:opacity-90 transition-opacity" />
+          <LifeBridgeLogo size="lg" className="max-w-[12rem] shrink-0 transition-opacity group-hover:opacity-90" />
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30 leading-none">
             Shared Insight
           </p>

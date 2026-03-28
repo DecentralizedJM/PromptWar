@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter, Merriweather } from 'next/font/google';
+import { Inter, Merriweather, Noto_Sans } from 'next/font/google';
+import { AppWrappers } from '@/components/AppWrappers';
 import './globals.css';
 
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
+});
+
+const notoSans = Noto_Sans({
+  variable: '--font-noto',
+  subsets: ['latin', 'latin-ext', 'devanagari'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
 });
 
 const merriweather = Merriweather({
@@ -33,11 +41,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${merriweather.variable} h-full antialiased dark`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${notoSans.variable} ${merriweather.variable} h-full antialiased dark`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap"
+        />
       </head>
-      <body className="h-full flex flex-col bg-background text-foreground font-sans sm:flex-row m-0 p-0 overflow-hidden">{children}</body>
+      <body className="m-0 flex h-full flex-col overflow-hidden bg-background p-0 font-sans text-foreground">
+        <AppWrappers>{children}</AppWrappers>
+      </body>
     </html>
   );
 }

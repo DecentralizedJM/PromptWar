@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { HistoryItem } from '@/lib/types';
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { BridgeTheGapLogo } from '@/components/BridgeTheGapLogo';
+import { LifeBridgeLogo } from '@/components/LifeBridgeLogo';
+import { useI18n } from '@/components/I18nProvider';
 import { cn } from '@/lib/utils';
 
 export function HistorySidebar({
@@ -13,6 +14,7 @@ export function HistorySidebar({
   history: HistoryItem[];
   onSelect: (item: HistoryItem) => void;
 }) {
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<string>('all');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -41,16 +43,16 @@ export function HistorySidebar({
   return (
     <aside 
       className={cn(
-        "h-full glass border-r border-border flex flex-col transition-all duration-500 z-30 relative overflow-hidden",
+        'h-full glass border-r border-border flex flex-col transition-all duration-500 z-10 relative overflow-hidden',
         isCollapsed ? "w-20" : "w-80"
       )}
-      aria-label="Bridge history"
+      aria-label={t.ariaHistory}
     >
       {/* Header */}
       <div className={cn("p-6 flex items-center justify-between border-b border-border", isCollapsed && "px-4")}>
         {!isCollapsed && (
           <div className="flex min-w-0 items-center gap-2 animate-slide-up">
-            <BridgeTheGapLogo size="lg" className="-translate-y-px" />
+            <LifeBridgeLogo size="lg" className="-translate-y-px max-w-[11rem]" />
           </div>
         )}
         <button
@@ -59,7 +61,7 @@ export function HistorySidebar({
             "p-2 rounded-xl hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-all active:scale-90",
             isCollapsed && "mx-auto"
           )}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? t.expandSidebar : t.collapseSidebar}
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
@@ -73,7 +75,7 @@ export function HistorySidebar({
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/20" />
               <input
                 type="text"
-                placeholder="Search history..."
+                placeholder={t.historySearch}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full bg-secondary/30 border-glass rounded-xl py-2 pl-9 pr-4 text-xs font-bold text-foreground placeholder:text-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -88,7 +90,7 @@ export function HistorySidebar({
                   filter === 'all' ? "bg-primary text-primary-foreground" : "bg-foreground/5 text-foreground/40 hover:bg-foreground/10"
                 )}
               >
-                All
+                {t.filterAll}
               </button>
               {domains.map(d => (
                 <button
@@ -113,7 +115,7 @@ export function HistorySidebar({
                    <Clock size={24} />
                 </div>
                 <p className="text-[11px] font-bold text-foreground/30 uppercase tracking-[0.2em]">
-                  No bridges found
+                  {t.noBridgesFound}
                 </p>
               </div>
             ) : (
