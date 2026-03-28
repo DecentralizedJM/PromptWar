@@ -111,11 +111,20 @@ Open `http://localhost:3000` to view the app.
 
 ---
 
-## ☁️ Deployment (Vercel)
+## ☁️ Deployment (Cloud Run & Vercel)
 
-This application is structurally optimized and pre-configured for a zero-friction Vercel deployment. Wait times on cold boots have been preemptively minimized.
+This application is structurally optimized and pre-configured for zero-friction serverless deployments.
 
-### One-Command Deploy:
+### Google Cloud Run (Recommended)
+LifeBridge is fully containerized with a highly optimized multi-stage `Dockerfile` creating a standalone Next.js image with an auto-scaler health check (`/api/health`).
+
+If you have connected your GitHub to Google Cloud Build, pushing `main` will auto-deploy. Or deploy manually:
+```bash
+gcloud run deploy lifebridge --source . --region europe-west1 --allow-unauthenticated --set-env-vars="GEMINI_API_KEY=your_key"
+```
+
+### Vercel Deployment
+
 Ensure you have the Vercel CLI installed globally (`npm i -g vercel`), then run:
 ```bash
 npm run deploy
