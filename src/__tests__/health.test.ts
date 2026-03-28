@@ -8,10 +8,12 @@ describe('/api/health', () => {
     const body = (await res.json()) as {
       status: string;
       timestamp: string;
+      gemini: { configured: boolean };
       googleCloud: Record<string, string | null>;
     };
     expect(body.status).toBe('healthy');
     expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(body.gemini).toEqual({ configured: true });
     expect(body.googleCloud).toBeDefined();
     expect('service' in body.googleCloud).toBe(true);
     expect('revision' in body.googleCloud).toBe(true);

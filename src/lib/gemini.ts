@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { GoogleGenAI } from '@google/genai';
+import { GEMINI_API_KEY_MISSING_MESSAGE, getGeminiApiKeyFromEnv } from './gemini-env';
 import { getLocaleEnglishName, type AppLocale } from './i18n/config';
 import { GEMINI_MODEL_ID } from './google-services';
 import { ProcessingResult } from './types';
@@ -54,9 +55,9 @@ export async function processInputWithGemini(
   imagesBase64: { data: string, mimeType: string }[] = [],
   options?: { uiLocale?: AppLocale }
 ): Promise<ProcessingResult> {
-  const apiKey = process.env.GEMINI_API_KEY || '';
+  const apiKey = getGeminiApiKeyFromEnv();
   if (!apiKey) {
-    return { cards: [], error: "Missing GEMINI_API_KEY in server environment variables." };
+    return { cards: [], error: GEMINI_API_KEY_MISSING_MESSAGE };
   }
   const ai = new GoogleGenAI({ apiKey });
 

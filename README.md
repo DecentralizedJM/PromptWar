@@ -242,6 +242,28 @@ npm run test
 ### Google Cloud Run (Production)
 LifeBridge is containerized with a multi-stage `Dockerfile` and includes a `/api/health` endpoint for load balancer health checks.
 
+The server reads the Gemini key **at runtime** from the environment (`process.env`). It is **not** baked into the Docker image. If the UI shows an error about a missing API key, the Cloud Run **revision** does not have the variable set.
+
+**1. Set the key on the existing service** (replace `YOUR_KEY` and service name if yours differs):
+
+```bash
+gcloud run services update promptwar \
+  --region=europe-west1 \
+  --set-env-vars="GEMINI_API_KEY=YOUR_KEY"
+```
+
+Also set every **`NEXT_PUBLIC_FIREBASE_*`** variable your app needs (see `.env.example`), either in the same command (comma-separated) or in the console.
+
+**2. Or use the console:** [Cloud Run](https://console.cloud.google.com/run) → your service → **Edit & deploy new revision** → **Variables & Secrets** → add `GEMINI_API_KEY` (and Firebase `NEXT_PUBLIC_*` vars).
+
+**3. Verify (no secret in response):** open `https://YOUR-SERVICE-URL.run.app/api/health` and check `"gemini": { "configured": true }`. If `configured` is `false`, the running revision still has no key.
+
+**Optional env names** (same key; first match wins): `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`.
+
+**Recommended for production:** store the key in [Secret Manager](https://console.cloud.google.com/security/secret-manager) and attach it as a secret env var on the Cloud Run service instead of plain `set-env-vars`.
+
+Fresh deploy example:
+
 ```bash
 gcloud run deploy promptwar \
   --source . \
@@ -250,7 +272,7 @@ gcloud run deploy promptwar \
   --set-env-vars="GEMINI_API_KEY=your_key"
 ```
 
-GitHub-connected Cloud Build triggers auto-deploy on push to `main`.
+GitHub-connected Cloud Build triggers auto-deploy on push to `main` — ensure the **build trigger** or service YAML still attaches `GEMINI_API_KEY` (or a secret) to **every** new revision; otherwise each deploy can drop the variable if it was only set manually once.
 
 ### Vercel (Alternative)
 ```bash
