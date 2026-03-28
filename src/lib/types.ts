@@ -3,13 +3,13 @@ export type DomainType = 'HEALTH' | 'FINANCE' | 'LOGISTICS' | 'GOVERNMENT_LEGAL'
 export interface Action {
   type: 'ADD_CALENDAR' | 'DRAFT_EMAIL' | 'SET_REMINDER' | 'GENERATE_PDF' | 'TRANSLATE';
   label: string;
-  payload: Record<string, string>; // e.g. { to: "doc@doc.com", subject: "...", body: "..." }
+  payload: Record<string, string>;
 }
 
 export interface CardItem {
   label: string;
   value: string;
-  status: 'normal' | 'warning' | 'success'; // 'warning' uses amber, 'success' uses seafoam
+  status: 'normal' | 'warning' | 'success';
 }
 
 export interface StructuredCard {
@@ -17,9 +17,9 @@ export interface StructuredCard {
   domain: DomainType;
   title: string;
   summary: string;
-  logicReasoning: string; // Explains the internal AI logic behind this specific categorization/status
+  logicReasoning: string;
   items: CardItem[];
-  confidenceScore: number; // 0 to 100
+  confidenceScore: number;
   actions: Action[];
 }
 
@@ -33,4 +33,33 @@ export interface HistoryItem {
   timestamp: number;
   inputSummary: string;
   results: StructuredCard[];
+}
+
+// Bridge Share types
+export interface SharedBridge {
+  shareId: string;
+  cards: StructuredCard[];
+  createdAt: number;
+  expiresAt: number;
+  title: string;
+}
+
+// Family Mode types
+export interface FamilyRoom {
+  roomCode: string;
+  createdAt: number;
+  members: RoomMember[];
+}
+
+export interface RoomMember {
+  id: string;
+  name: string;
+  emoji: string;
+  joinedAt: number;
+}
+
+export interface RoomCard extends StructuredCard {
+  contributedBy: string;
+  contributorEmoji: string;
+  addedAt: number;
 }
