@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 export function StructuredCardView({ card, allCards, index = 0 }: { card: StructuredCard; allCards?: StructuredCard[]; index?: number }) {
   const [showVerify, setShowVerify] = useState(false);
 
-  const domainMap: Record<string, { class: string, text: string, icon: any }> = {
+  const domainMap: Record<string, { class: string, text: string, icon: React.ElementType }> = {
     'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
     'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
     'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
@@ -99,7 +99,7 @@ export function StructuredCardView({ card, allCards, index = 0 }: { card: Struct
             AI Reasoning & Verification
           </div>
           <p className="text-xs leading-relaxed text-foreground/60 font-medium italic">
-            "{card.logicReasoning}"
+            &quot;{card.logicReasoning}&quot;
           </p>
         </div>
       )}

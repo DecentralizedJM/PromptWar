@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Share2, Copy, Check, X, Loader2, QrCode } from 'lucide-react';
 import { StructuredCard } from '@/lib/types';
-import { QRCode } from './QRCode';
-import { cn } from '@/lib/utils';
+import { QRCode } from '@/components/QRCode';
 
 interface ShareButtonProps {
   cards: StructuredCard[];
@@ -104,7 +103,7 @@ export function ShareButton({ cards, title }: ShareButtonProps) {
           </div>
           
           <div className="p-4 bg-white/5 border-t border-white/5 text-center">
-             <p className="text-[10px] font-medium text-foreground/30 italic">"Secure, ephemeral, and structured."</p>
+             <p className="text-[10px] font-medium text-foreground/30 italic">&quot;Secure, ephemeral, and structured.&quot;</p>
           </div>
         </div>
       </div>

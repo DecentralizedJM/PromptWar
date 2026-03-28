@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
-import { RoomCard, StructuredCard, DomainType, RoomMember, FamilyRoom } from '@/lib/types';
+import { RoomCard, DomainType, RoomMember, FamilyRoom } from '@/lib/types';
 import { HeartPulse, Landmark, Package, FileText, Copy, Check, LogOut, Bot, ShieldCheck, UserCircle2 } from 'lucide-react';
 import { submitToGemini } from '@/app/actions';
 import { InputZone } from './InputZone';
@@ -19,7 +19,7 @@ interface RoomDashboardProps {
   onLeave: () => void;
 }
 
-const DOMAIN_MAP: Record<string, { class: string, text: string, icon: any }> = {
+const DOMAIN_MAP: Record<string, { class: string, text: string, icon: React.ElementType }> = {
   'HEALTH': { class: 'border-l-health', text: 'text-health', icon: HeartPulse },
   'FINANCE': { class: 'border-l-finance', text: 'text-finance', icon: Landmark },
   'LOGISTICS': { class: 'border-l-logistics', text: 'text-logistics', icon: Package },
@@ -161,7 +161,7 @@ export function RoomDashboard({ roomCode, memberId, memberEmoji, memberName, onL
           
           <div className="mt-12 p-6 rounded-2xl bg-white/5 border-glass border-dashed">
              <p className="text-[11px] leading-relaxed text-foreground/40 font-medium italic">
-                "Contributions here are instantly synthesized and reflected on the shared family dashboard in real-time."
+                &quot;Contributions here are instantly synthesized and reflected on the shared family dashboard in real-time.&quot;
              </p>
           </div>
         </div>
